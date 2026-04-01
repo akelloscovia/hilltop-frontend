@@ -1,0 +1,65 @@
+.about-hero img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  filter: brightness(0.75);
+}
+
+.section {
+  max-width: 1140px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.section-title {
+  text-align: center;
+  background: #0a1a8a;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  background: #f6f6f6;
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px solid #0a1a8a;
+}
+
+.card h4 {
+  margin-top: 0;
+  color: #0a1a8a;
+}
+
+.leaders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.leader-box, .achievement-box {
+  background: #f6f6f6;
+  border-radius: 8px;
+  border: 2px solid #0a1a8a;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #0a1a8a;
+}
+
+@media (max-width: 768px) {
+  .about-hero img {height: 180px;}
+  .section {padding: 1rem;}
+}

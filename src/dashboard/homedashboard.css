@@ -1,0 +1,68 @@
+.home-dashboard {
+  min-height: 100vh;
+  padding: 40px;
+  background: linear-gradient(rgba(0,0,0,0.85), rgba(10, 47, 92, 0.9));
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.home-dashboard h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.home-dashboard form {
+  max-width: 800px;
+  margin: auto;
+  background: rgba(255,255,255,0.05);
+  padding: 30px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+}
+
+.home-dashboard h3 {
+  margin-top: 20px;
+  color: #00c6ff;
+}
+
+.home-dashboard label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.home-dashboard input,
+.home-dashboard textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.home-dashboard textarea {
+  min-height: 100px;
+}
+
+.home-dashboard button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #00c6ff;
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.home-dashboard button:hover {
+  background: #009ac7;
+}
+
+.message {
+  text-align: center;
+  margin-bottom: 15px;
+}

@@ -1,0 +1,84 @@
+/* MAIN CONTAINER */
+.about-dashboard {
+  min-height: 100vh;
+  padding: 40px;
+  background: linear-gradient(rgba(4, 9, 47, 0.9), rgba(10, 47, 92, 0.9));
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* TITLE */
+.about-dashboard h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 32px;
+  letter-spacing: 1px;
+}
+
+/* FORM */
+.about-dashboard form {
+  max-width: 800px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 30px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+}
+
+/* SECTION HEADINGS */
+.about-dashboard h3 {
+  margin-top: 25px;
+  margin-bottom: 10px;
+  color: #00c6ff;
+}
+
+/* LABELS */
+.about-dashboard label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+/* INPUTS */
+.about-dashboard input,
+.about-dashboard textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* TEXTAREA HEIGHT */
+.about-dashboard textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* BUTTON */
+.about-dashboard button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #00c6ff;
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.about-dashboard button:hover {
+  background: #00a3cc;
+}
+
+/* MESSAGE */
+.message {
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}

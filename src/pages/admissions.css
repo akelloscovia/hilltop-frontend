@@ -1,0 +1,354 @@
+﻿.admissions-page {
+  min-height: calc(100vh - 90px);
+  padding: 45px 18px 60px;
+}
+
+.admissions-wrapper {
+  max-width: 1050px;
+  margin: 0 auto;
+  background: #f8f9ff;
+  border-radius: 16px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  overflow: hidden;
+}
+
+.admissions-card-header {
+  padding: 30px 30px 22px;
+  background: #ffffff;
+  text-align: center;
+  border-bottom: 1px solid #d8e1fb;
+}
+
+.admissions-card-header h2 {
+  margin: 0;
+  font-size: 2.3rem;
+  color: #0a1a8a;
+}
+
+.admissions-card-header h3 {
+  margin: 8px 0 12px;
+  color: #1956c3;
+}
+
+.admissions-card-header p {
+  color: #4a5778;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.admissions-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  padding: 24px 30px;
+}
+
+.admissions-text {
+  display: grid;
+  gap: 16px;
+}
+
+.info-box {
+  background: #ffffff;
+  border: 1px solid #d4e0f3;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.info-box h4 {
+  margin: 0 0 10px;
+  color: #0a1a8a;
+}
+
+.info-box ul,
+.info-box ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #4f5f8e;
+}
+
+.admissions-image img {
+  width: 100%;
+  height: 100%;
+  min-height: 310px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #d4e0f3;
+}
+
+.fees-section {
+  padding: 18px 30px 24px;
+  background: #ffffff;
+  border-top: 1px solid #d8e1fb;
+}
+
+.fees-section h4 {
+  margin: 0 0 12px;
+  color: #0a1a8a;
+}
+
+.fees-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.fee-box {
+  background: #e7efff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #25427a;
+  font-weight: 600;
+}
+
+.fee-note {
+  color: #b03030;
+  margin-top: 12px;
+}
+
+.apply {
+  padding: 20px 30px 28px;
+  text-align: center;
+  background: #ffffff;
+  border-top: 1px solid #d8e1fb;
+}
+
+.apply button {
+  background: #0a1a8a;
+  color: white;
+  border: none;
+  padding: 12px 26px;
+  border-radius: 22px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.apply button:hover {
+  transform: translateY(-1px);
+  background: #143b9e;
+}
+
+@media (max-width: 950px) {
+  .admissions-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .admissions-image img {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 700px) {
+  .admissions-page {
+    padding: 20px 10px 40px;
+  }
+
+  .admissions-card-header h2 {
+    font-size: 1.7rem;
+  }
+
+  .admissions-card-header h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* MODAL STYLES */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #0a1a8a 0%, #1956c3 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.close-btn:hover {
+  transform: scale(1.2);
+}
+
+.application-form {
+  padding: 25px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #0a1a8a;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #d4e0f3;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1956c3;
+  box-shadow: 0 0 0 3px rgba(25, 86, 195, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.submit-btn,
+.cancel-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #0a1a8a 0%, #1956c3 100%);
+  color: white;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(10, 26, 138, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    max-width: 95%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .application-form {
+    padding: 18px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+}
+
+/* Form Validation Styles */
+.input-error {
+  border-color: #ff6b6b !important;
+  background-color: #fff5f5 !important;
+}
+
+.error-text {
+  display: block;
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.form-group .input-error:focus {
+  outline: none;
+  border-color: #ff6b6b !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}

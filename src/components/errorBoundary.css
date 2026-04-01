@@ -1,0 +1,56 @@
+.error-boundary {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  padding: 20px;
+}
+
+.error-content {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.error-content h2 {
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.error-content p {
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+.error-content button {
+  background: #0a1a8a;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s;
+}
+
+.error-content button:hover {
+  background: #143b9e;
+}
+
+.error-content details {
+  text-align: left;
+  margin-top: 20px;
+  padding: 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.error-content pre {
+  overflow-x: auto;
+  margin: 10px 0 0 0;
+  font-size: 0.85rem;
+}

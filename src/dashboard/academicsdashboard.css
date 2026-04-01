@@ -1,0 +1,76 @@
+/* MAIN */
+.academics-dashboard {
+  min-height: 100vh;
+  padding: 40px;
+  background: linear-gradient(rgba(2, 5, 40, 0.9), rgba(10, 47, 146, 0.9));
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* TITLE */
+.academics-dashboard h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 30px;
+}
+
+/* FORM */
+.academics-dashboard form {
+  max-width: 800px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 30px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+}
+
+/* LABEL */
+.academics-dashboard label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+/* INPUT */
+.academics-dashboard input,
+.academics-dashboard textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* TEXTAREA */
+.academics-dashboard textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* BUTTON */
+.academics-dashboard button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #00c6ff;
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.academics-dashboard button:hover {
+  background: #009ac7;
+}
+
+/* MESSAGE */
+.message {
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
