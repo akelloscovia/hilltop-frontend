@@ -1,62 +1,230 @@
 import React, { useEffect, useState } from "react";
 import "./home.css";
+import { apiGet } from "../utils/apiClient";
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || "";
+const LOCAL_HOME_KEY = "dashboard_home_data";
+const LOCAL_GALLERY_KEY = "dashboard_gallery_images";
+
+const loadHomeFallback = () => {
+  try {
+    const saved = localStorage.getItem(LOCAL_HOME_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch (err) {
+    console.error("Could not read home fallback from localStorage", err);
+    return null;
+  }
+};
+
+const getImageUrl = (value) => {
+  if (!value) return "";
+  if (
+    value.startsWith("http") ||
+    value.startsWith("data:") ||
+    value.startsWith("blob:")
+  ) {
+    return value;
+  }
+  if (API_BASE_URL) return `${API_BASE_URL}/${value}`;
+  return value.startsWith("/") ? value : `/${value}`;
+};
+
+const unwrapPayload = (payload) => {
+  let current = payload;
+  while (
+    current &&
+    typeof current === "object" &&
+    (current.data || current.result)
+  ) {
+    current = current.data || current.result;
+  }
+  return current;
+};
+
+const resolveGalleryImages = (data) => {
+  if (!data) return [];
+  if (Array.isArray(data)) data = data[0] || {};
+  if (Array.isArray(data.gallery_images)) return data.gallery_images;
+  if (Array.isArray(data.images)) return data.images;
+  if (Array.isArray(data.gallery)) return data.gallery;
+
+  const raw = data.gallery_images || data.images || data.gallery;
+  if (typeof raw === "string") {
+    return raw
+      .split(/\n|\r|,/) 
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const normalizeCoreValues = (data) => {
+  if (Array.isArray(data.core_values)) return data.core_values;
+  if (Array.isArray(data.coreValues)) return data.coreValues;
+  const raw = data.core_values || data.coreValues;
+  if (typeof raw === "string") {
+    return raw
+      .split(/\n|\r|,/) 
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const deduplicateCoreValues = (values) => {
+  if (!Array.isArray(values)) return values;
+  const seen = new Set();
+  return values.filter((value) => {
+    let key;
+    if (typeof value === 'object' && value !== null) {
+      // For objects, create a unique key from all properties
+      key = JSON.stringify(value).toLowerCase();
+    } else {
+      // For strings, normalize by lowercasing and trimming
+      key = String(value).toLowerCase().trim();
+    }
+    
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+const loadGalleryFallback = () => {
+  try {
+    const saved = localStorage.getItem(LOCAL_GALLERY_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (err) {
+    console.error("Could not read gallery fallback from localStorage", err);
+    return [];
+  }
+};
+
+const firstNonEmpty = (...vals) => {
+  for (const v of vals) {
+    if (v == null) continue;
+    if (Array.isArray(v) && v.length > 0) return v;
+    if (typeof v === 'string' && v.trim() !== '') return v;
+    if (typeof v === 'object' && Object.keys(v).length > 0) return v;
+  }
+  return null;
+};
 
 export default function Home() {
   const [heroImage, setHeroImage] = useState("");
-  const [content, setContent] = useState({
-    welcomeText: "WELCOME TO",
-    intro: "Hilltop Junior School is a warm and vibrant learning community offering Daycare, Kindergarten, and Primary education. We provide a safe, friendly, and inclusive environment where every child thrives.",
-    vision: "To nurture confident, creative, and responsible learners.",
-    mission: "To provide accessible quality education in a safe, supportive environment.",
-    coreValues: [
-      { title: "Respect", description: "We value diversity and dignity for all." },
-      { title: "Excellence", description: "We strive for high standards in learning and behavior." },
-      { title: "Community", description: "We build strong partnerships between pupils, staff and families." },
-      { title: "Curiosity", description: "We encourage exploration, creativity and lifelong learning." }
-    ]
-  });
+  const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch Home page content from backend
   useEffect(() => {
     const fetchHomeContent = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:5000/api/v1/home");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const rawData = await apiGet("/home");
+        console.debug('Home rawData:', rawData);
+        let data = unwrapPayload(rawData) || {};
+        console.debug('Home unwrapped data:', data);
+        if (Array.isArray(data) && data.length > 0) {
+          data = data[0];
+        }
+        const fallback = loadHomeFallback();
+        console.debug('Home fallback from localStorage:', fallback);
 
-        // Set hero image
-        if (data.hero_image) {
-          setHeroImage(data.hero_image.startsWith("http") ? data.hero_image : `http://127.0.0.1:5000/${data.hero_image}`);
-        } else if (data.gallery_images && data.gallery_images.length > 0) {
-          const candidate = data.gallery_images[Math.floor(Math.random() * data.gallery_images.length)];
-          setHeroImage(candidate.image.startsWith("http") ? candidate.image : `http://127.0.0.1:5000/${candidate.image}`);
-        } else {
-          setHeroImage("/images/students.jpg");
+        let image = "";
+        const heroSource =
+          data.hero_image ||
+          data.image_url ||
+          data.image ||
+          data.heroImage ||
+          data.hero_image_url ||
+          fallback?.hero_image;
+
+        const rawGallery = resolveGalleryImages(data);
+        let galleryCandidates = rawGallery;
+
+        if (!galleryCandidates.length) {
+          try {
+            const galleryRawData = await apiGet("/gallery");
+            let galleryData = unwrapPayload(galleryRawData) || {};
+            if (Array.isArray(galleryData) && galleryData.length > 0) {
+              galleryData = galleryData[0];
+            }
+            galleryCandidates = resolveGalleryImages(galleryData);
+            if (!galleryCandidates.length) {
+              galleryCandidates = loadGalleryFallback();
+            }
+          } catch (err) {
+            console.warn("Gallery fallback fetch failed:", err);
+            galleryCandidates = loadGalleryFallback();
+          }
         }
 
-        // Set text content from API model
+        if (heroSource) {
+          image = getImageUrl(heroSource);
+        } else if (galleryCandidates.length > 0) {
+          const random = galleryCandidates[Math.floor(Math.random() * galleryCandidates.length)];
+          image = getImageUrl(random?.image || random?.image_url || random?.url || random?.src || random);
+        }
+
+        setHeroImage(image);
+        const introText =
+          firstNonEmpty(
+            data.about_text,
+            data.description,
+            data.intro,
+            data.home_text,
+            data.home_intro,
+            data.body,
+            data.text,
+            fallback?.about_text,
+            fallback?.description,
+            fallback?.intro,
+            fallback?.home_text,
+            fallback?.home_intro
+          ) ||
+          "Hilltop Junior School is a warm and vibrant learning community offering Daycare, Kindergarten, and Primary education. We provide a safe, friendly, and inclusive environment where every child thrives.";
+
         setContent({
-          welcomeText: data.hero_title || "WELCOME TO",
-          intro: data.about_text || content.intro,
-          vision: data.vision || content.vision,
-          mission: data.mission || content.mission,
-          coreValues: data.core_values || content.coreValues
+          welcomeText: data.hero_title || data.title || data.heading || fallback?.hero_title || "",
+          subtitle: data.hero_subtitle || data.subtitle || data.tagline || fallback?.hero_subtitle || "",
+          intro: introText,
+          vision: data.vision || fallback?.vision || "",
+          mission: data.mission || fallback?.mission || "",
+          coreValues: (() => {
+            const normalized = normalizeCoreValues(data).length > 0 ? normalizeCoreValues(data) : normalizeCoreValues(fallback || {});
+            console.log('Normalized core values:', normalized);
+            const deduplicated = deduplicateCoreValues(normalized);
+            console.log('Deduplicated core values:', deduplicated);
+            return deduplicated;
+          })()
         });
-      } catch (error) {
-        console.error("Error fetching home content:", error);
-        setHeroImage("/images/students.jpg");
+      } catch (err) {
+        console.error("Home fetch error:", err);
+        const fallback = loadHomeFallback();
+        setHeroImage("");
+        const introFallback =
+          firstNonEmpty(
+            fallback?.about_text,
+            fallback?.description,
+            fallback?.intro,
+            fallback?.home_text,
+            fallback?.home_intro,
+            fallback?.body,
+            fallback?.text
+          ) ||
+          "Hilltop Junior School is a warm and vibrant learning community offering Daycare, Kindergarten, and Primary education. We provide a safe, friendly, and inclusive environment where every child thrives.";
+
         setContent({
-          welcomeText: "WELCOME TO",
-          intro: "Hilltop Junior School is a warm and vibrant learning community offering Daycare, Kindergarten, and Primary education. We provide a safe, friendly, and inclusive environment where every child thrives.",
-          vision: "To nurture confident, creative, and responsible learners.",
-          mission: "To provide accessible quality education in a safe, supportive environment.",
-          coreValues: [
-            { title: "Respect", description: "We value diversity and dignity for all." },
-            { title: "Excellence", description: "We strive for high standards in learning and behavior." },
-            { title: "Community", description: "We build strong partnerships between pupils, staff and families." },
-            { title: "Curiosity", description: "We encourage exploration, creativity and lifelong learning." }
-          ]
+          welcomeText: fallback?.hero_title || "",
+          subtitle: fallback?.hero_subtitle || "",
+          intro: introFallback,
+          vision: fallback?.vision || "",
+          mission: fallback?.mission || "",
+          coreValues: (() => {
+            const normalized = normalizeCoreValues(fallback || {});
+            console.log('Fallback normalized core values:', normalized);
+            const deduplicated = deduplicateCoreValues(normalized);
+            console.log('Fallback deduplicated core values:', deduplicated);
+            return deduplicated;
+          })()
         });
       } finally {
         setLoading(false);
@@ -67,61 +235,66 @@ export default function Home() {
   }, []);
 
   if (loading) return <p>Loading home page...</p>;
+  if (!content) return <p>No content found</p>;
 
   return (
     <div
       className="home-page"
       style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${heroImage})`,
+        backgroundImage: heroImage
+          ? `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${heroImage})`
+          : "none",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        transition: "background-image 0.6s ease-in-out",
         color: "#fff"
       }}
     >
       <section className="hero-section">
-        <img
-          src={heroImage}
-          alt="students"
-          className="hero-img"
-          loading="lazy"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/images/placeholder.jpg";
-          }}
-        />
+        {heroImage && (
+          <img
+            src={heroImage}
+            alt="hero"
+            className="hero-img"
+            loading="lazy"
+            onError={(e) => {
+              e.target.src = "/images/placeholder.jpg";
+            }}
+          />
+        )}
+
         <div className="hero-text">
           <h1>{content.welcomeText}</h1>
-          <h2>Hilltop Junior School Kasangati</h2>
+          <h2>{content.subtitle || "Hilltop Junior School Kasangati"}</h2>
           <p>{content.intro}</p>
-        </div>
-      </section>
-
-      <section className="about-preview">
-        <div className="value-cards">
-          <div className="card">
-            <h4>Our Vision</h4>
-            <p>{content.vision}</p>
-          </div>
-          <div className="card">
-            <h4>Our Mission</h4>
-            <p>{content.mission}</p>
-          </div>
         </div>
       </section>
 
       <section className="values-section">
         <h3>OUR CORE VALUES</h3>
+
         <div className="value-cards">
-          {content.coreValues.map((value, index) => (
-            <div className="card" key={index}>
-              <h4>{value.title}</h4>
-              <p>{value.description}</p>
-            </div>
-          ))}
+          {Array.isArray(content.coreValues) &&
+          content.coreValues.length > 0 ? (
+            content.coreValues.map((value, index) => (
+              <div className="card" key={index}>
+                <h4>{typeof value === 'object' ? value.title || value.name : value}</h4>
+                <p>{typeof value === 'object' ? value.description || value.text : value}</p>
+              </div>
+            ))
+          ) : (
+            <p>No core values set in dashboard yet.</p>
+          )}
         </div>
       </section>
+
+      {(content.vision || content.mission) && (
+        <section className="mission-section">
+          <h3>Our Vision & Mission</h3>
+          {content.vision && <p><strong>Vision:</strong> {content.vision}</p>}
+          {content.mission && <p><strong>Mission:</strong> {content.mission}</p>}
+        </section>
+      )}
     </div>
   );
 }

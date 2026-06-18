@@ -42,35 +42,101 @@
   margin-bottom: 0.4rem;
 }
 
-.academic-card-section {
+.academic-summary-section {
+  background: #ffffff;
+  padding: 28px 26px;
+  border-top: 1px solid #dbe4f8;
+  border-bottom: 1px solid #dbe4f8;
+}
+
+.section-title {
+  font-size: 1.45rem;
+  color: #0a2f92;
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.academic-summary-grid {
   display: flex;
-  flex-wrap: wrap;
   gap: 20px;
+  align-items: stretch;
+}
+
+.academic-summary-grid.horizontal {
+  flex-direction: row;
+}
+
+.academic-summary-block {
+  background: #f7f9ff;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid #d7e1f8;
+  box-shadow: 0 8px 16px rgba(4, 20, 70, 0.04);
+}
+
+.academic-summary-block h4 {
+  color: #0a2f92;
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+}
+
+.academic-summary-block p {
+  color: #394769;
+  line-height: 1.68;
+}
+
+.academic-card-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+  gap: 22px;
   padding: 24px;
   background: #f7f9ff;
 }
 
+.academic-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.academic-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 18px;
+}
+
 .academic-card {
-  flex: 1 1 420px;
   background: #ffffff;
-  padding: 18px 20px;
-  border-radius: 14px;
+  padding: 22px 20px;
+  border-radius: 16px;
   border: 1px solid #d7e1f8;
-  box-shadow: 0 8px 16px rgba(4, 20, 70, 0.08);
+  box-shadow: 0 14px 28px rgba(4, 20, 70, 0.06);
 }
 
 .academic-card h4 {
   color: #0a2f92;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
 }
 
 .academic-card p {
-  color: #394769;
-  line-height: 1.6;
+  color: #434f75;
+  line-height: 1.72;
 }
 
 .academic-image {
-  flex: 1 1 420px;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.academic-image img {
+  width: 100%;
+  max-height: 450px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid #d7e1f8;
 }
 
 .academic-image img {
@@ -99,6 +165,13 @@
 }
 
 @media (max-width: 900px) {
+  .academic-summary-grid,
+  .academic-card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
   .academic-card-section {
     display: block;
     padding: 18px;
@@ -109,7 +182,40 @@
     width: 100%;
   }
 
+  .academic-image {
+    min-height: auto;
+  }
+
   .academics-page {
     padding: 20px 12px 60px;
+  }
+}
+
+@media (max-width: 640px) {
+  .academics-content {
+    border-radius: 14px;
+  }
+
+  .academics-hero {
+    padding: 24px 16px;
+  }
+
+  .academic-summary-section,
+  .academic-card-section,
+  .academic-additional {
+    padding: 20px 16px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+
+  .academic-summary-block,
+  .academic-card {
+    padding: 18px;
+  }
+
+  .academic-image img {
+    max-height: 320px;
   }
 }

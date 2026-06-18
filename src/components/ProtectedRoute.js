@@ -1,22 +1,13 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
-/**
- * ProtectedRoute - Wrapper for routes that require admin authentication
- * 
- * Usage:
- * <ProtectedRoute>
- *   <Dashboard />
- * </ProtectedRoute>
- */
 export default function ProtectedRoute({ children }) {
-  const adminToken = localStorage.getItem('adminToken');
+  const ADMIN_TOKEN_KEY = process.env.REACT_APP_ADMIN_TOKEN_KEY || "adminToken";
+  const adminToken = localStorage.getItem(ADMIN_TOKEN_KEY);
 
-  // If no token exists, redirect to login
   if (!adminToken) {
-    return <Navigate to="/admin-login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
-  // Token exists, render the protected component
   return children;
 }

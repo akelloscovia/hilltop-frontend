@@ -1,135 +1,130 @@
 import React, { useEffect, useState } from "react";
 import "./contactdashboard.css";
+import { apiGet, apiPut, apiPost } from "../utils/apiClient";
 
-const API_BASE_URL = "http://127.0.0.1:5000";
+const defaultContactInfo = {
+  email: "info@hilltop.com",
+  phone: "+256 123 456 789",
+  location: "Kasangati, Uganda",
+  mapLink: ""
+};
 
 export default function ContactDashboard() {
-  const [contactInfo, setContactInfo] = useState({
-    email: "info@hilltop.com",
-    phone: "+256 123 456 789",
-    location: "Kasangati, Uganda"
-  });
-
+  const [contactInfo, setContactInfo] = useState(defaultContactInfo);
   const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
 
-  // Fetch contact info + messages
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/v1/contact_info`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setContactInfo({
-            email: data[0].email || contactInfo.email,
-            phone: data[0].phone_number || contactInfo.phone,
-            location: data[0].address || contactInfo.location
-          });
-        } else if (data && data.address) {
-          setContactInfo({
-            email: data.email || contactInfo.email,
-            phone: data.phone_number || contactInfo.phone,
-            location: data.address || contactInfo.location
-          });
-        }
-      })
-      .catch(err => {
-        console.error("Error fetching contact info:", err);
-      });
-
-    fetch(`${API_BASE_URL}/api/v1/contact`)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => setMessages(data))
-      .catch(err => {
-        console.error("Error fetching messages:", err);
-      });
+    fetchContactInfo();
+    fetchMessages();
   }, []);
 
-  // Handle changes
-  const handleChange = (e) => {
-    setContactInfo({
-      ...contactInfo,
-      [e.target.name]: e.target.value
-    });
+  const fetchContactInfo = async () => {
+    try {
+      const data = await apiGet("/contact_info");
+
+      if (Array.isArray(data) && data.length > 0) {
+        const item = data[0];
+        setContactInfo({
+          email: item.email || defaultContactInfo.email,
+          phone: item.phone_number || defaultContactInfo.phone,
+          location: item.address || defaultContactInfo.location,
+          mapLink: item.map_link || defaultContactInfo.mapLink
+        });
+      } else if (data && data.address) {
+        setContactInfo({
+          email: data.email || defaultContactInfo.email,
+          phone: data.phone_number || defaultContactInfo.phone,
+          location: data.address || defaultContactInfo.location,
+          mapLink: data.map_link || defaultContactInfo.mapLink
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching contact info:", err);
+    }
   };
 
-  // Save contact info
+  const fetchMessages = async () => {
+    try {
+      const data = await apiGet("/contact_message");
+      setMessages(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching messages:", err);
+      setMessages([]);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setContactInfo((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/contact-info`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(contactInfo)
-      });
+      const payload = {
+        email: contactInfo.email,
+        phone_number: contactInfo.phone,
+        address: contactInfo.location,
+        map_embed_url: contactInfo.mapLink
+      };
 
-      if (res.ok) {
-        setMessage("✅ Contact info updated!");
-      } else {
-        setMessage("❌ Failed to update");
+      try {
+        await apiPut("/contact_info/1", payload);
+        setStatusMessage("Contact info updated!");
+      } catch {
+        await apiPost("/contact_info", payload);
+        setStatusMessage("Contact info created!");
       }
+
+      setTimeout(() => setStatusMessage(""), 3000);
     } catch (err) {
       console.error(err);
-      setMessage("❌ Error occurred");
+      setStatusMessage("Error occurred");
     }
+  };
+
+  const getMapSrc = () => {
+    if (contactInfo.mapLink && contactInfo.mapLink.trim() !== "") {
+      return contactInfo.mapLink;
+    }
+
+    return `https://www.google.com/maps?q=${encodeURIComponent(contactInfo.location)}&output=embed`;
   };
 
   return (
     <div className="contact-dashboard">
       <h2>Contact Dashboard</h2>
-
-      {message && <p className="message">{message}</p>}
-
-      {/* CONTACT INFO */}
+      {statusMessage && <p className="message">{statusMessage}</p>}
       <form onSubmit={handleSubmit}>
         <h3>Edit Contact Info</h3>
-
         <label>Email</label>
-        <input
-          name="email"
-          value={contactInfo.email}
-          onChange={handleChange}
-        />
-
+        <input name="email" value={contactInfo.email} onChange={handleChange} />
         <label>Phone</label>
-        <input
-          name="phone"
-          value={contactInfo.phone}
-          onChange={handleChange}
-        />
-
+        <input name="phone" value={contactInfo.phone} onChange={handleChange} />
         <label>Location</label>
-        <input
-          name="location"
-          value={contactInfo.location}
-          onChange={handleChange}
-        />
-
+        <input name="location" value={contactInfo.location} onChange={handleChange} />
+        <label>Google Map Embed Link (optional)</label>
+        <input name="mapLink" value={contactInfo.mapLink} onChange={handleChange} placeholder="Paste Google Maps embed link" />
         <button type="submit">Save Changes</button>
       </form>
-
-      {/* MESSAGES */}
+      <div className="map-section">
+        <h3>Location Preview</h3>
+        <iframe src={getMapSrc()} loading="lazy" allowFullScreen title="map"></iframe>
+      </div>
       <div className="messages-section">
         <h3>Messages from Users</h3>
-
         {messages.length === 0 ? (
           <p>No messages yet</p>
         ) : (
           messages.map((msg, index) => (
             <div key={index} className="message-card">
-              <h4>{msg.fullName}</h4>
+              <h4>{msg.first_name} {msg.last_name}</h4>
               <p><strong>Email:</strong> {msg.email}</p>
               <p><strong>Phone:</strong> {msg.phone}</p>
-              <p><strong>Type:</strong> {msg.inquiryType}</p>
-              <p>{msg.message}</p>
+              <p><strong>Message:</strong> {msg.message}</p>
+              {msg.reply && <p><strong>Reply:</strong> {msg.reply}</p>}
             </div>
           ))
         )}

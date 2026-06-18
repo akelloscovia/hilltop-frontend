@@ -53,12 +53,14 @@ export const setSEOTags = (title, description, keywords = '', canonicalUrl = '')
   });
 };
 
+const pageOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+
 export const schemaData = {
   school: {
     '@context': 'https://schema.org',
     '@type': 'EducationalOrganization',
     'name': 'Hilltop Junior School',
-    'url': 'http://localhost:3000',
+    'url': pageOrigin,
     'address': {
       '@type': 'PostalAddress',
       'streetAddress': 'Kasangati',

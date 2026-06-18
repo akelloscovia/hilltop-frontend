@@ -12,7 +12,7 @@ export default function ApplicationsViewer() {
   const [filterGrade, setFilterGrade] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Set SEO tags
+  // ---------------- SEO ----------------
   useEffect(() => {
     setSEOTags(
       "Applications - Admin Dashboard",
@@ -21,22 +21,24 @@ export default function ApplicationsViewer() {
     );
   }, []);
 
-  // Fetch applications
+  // ---------------- FETCH APPLICATIONS ----------------
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         setLoading(true);
-        const data = await apiGet('/admissions/applications');
-        setApplications(data || []);
+
+        const data = await apiGet("/admissions/applications");
+
+        setApplications(Array.isArray(data) ? data : []);
         setError(null);
 
-        // Show notification badge
-        if (data && data.length > 0) {
-          document.title = `${data.length} New Applications - Admin`;
+        if (Array.isArray(data) && data.length > 0) {
+          document.title = `${data.length} Applications - Admin`;
         }
       } catch (err) {
         console.error("Error fetching applications:", err);
-        setError(err.message);
+        setError(err.message || "Failed to load applications");
+        setApplications([]);
       } finally {
         setLoading(false);
       }
@@ -44,23 +46,32 @@ export default function ApplicationsViewer() {
 
     fetchApplications();
 
-    // Refresh every 30 seconds for real-time updates
     const interval = setInterval(fetchApplications, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // Filter applications
-  const filteredApps = applications.filter(app => {
-    const matchesGrade = filterGrade === "all" || app.grade_applied === filterGrade;
-    const matchesSearch = 
-      app.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.parent_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.contact_number?.includes(searchTerm);
+  // ---------------- SAFE FILTERING ----------------
+  const filteredApps = applications.filter((app) => {
+    const name = app?.student_name?.toLowerCase() || "";
+    const email = app?.parent_email?.toLowerCase() || "";
+    const phone = app?.contact_number || "";
+
+    const matchesGrade =
+      filterGrade === "all" || app?.grade_applied === filterGrade;
+
+    const matchesSearch =
+      name.includes(searchTerm.toLowerCase()) ||
+      email.includes(searchTerm.toLowerCase()) ||
+      phone.includes(searchTerm);
+
     return matchesGrade && matchesSearch;
   });
 
-  const grades = [...new Set(applications.map(app => app.grade_applied))].sort();
+  const grades = [
+    ...new Set(applications.map((app) => app?.grade_applied).filter(Boolean))
+  ].sort();
 
+  // ---------------- LOADING ----------------
   if (loading) {
     return (
       <div style={{ padding: "2rem" }}>
@@ -71,93 +82,105 @@ export default function ApplicationsViewer() {
 
   return (
     <div className="applications-viewer">
-      {/* Header Section */}
+
+      {/* HEADER */}
       <div className="viewer-header">
         <div className="header-content">
           <h1>📋 Applications Management</h1>
+
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-number">{applications.length}</span>
-              <span className="stat-label">Total Applications</span>
+              <span className="stat-label">Applications</span>
             </div>
+
             <div className="stat-card">
               <span className="stat-number">{grades.length}</span>
-              <span className="stat-label">Grades Applied</span>
+              <span className="stat-label">Grades</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="error-banner">
-          ⚠️ {error}
-        </div>
-      )}
+      {/* ERROR */}
+      {error && <div className="error-banner">⚠️ {error}</div>}
 
-      {/* No Applications */}
-      {applications.length === 0 && !error && (
+      {/* EMPTY STATE */}
+      {!error && applications.length === 0 && (
         <div className="no-applications">
-          <p>📭 No applications submitted yet</p>
+          <p>📭 No applications yet</p>
         </div>
       )}
 
-      {/* Applications List */}
+      {/* TABLE SECTION */}
       {applications.length > 0 && (
         <>
-          {/* Filters and Search */}
+          {/* FILTERS */}
           <div className="filter-section">
             <input
               type="text"
-              placeholder="🔍 Search by name, email, or phone..."
+              placeholder="Search applications..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
+
             <select
               value={filterGrade}
               onChange={(e) => setFilterGrade(e.target.value)}
               className="filter-select"
             >
               <option value="all">All Grades</option>
-              {grades.map(grade => (
-                <option key={grade} value={grade}>{grade}</option>
+              {grades.map((grade, i) => (
+                <option key={i} value={grade}>
+                  {grade}
+                </option>
               ))}
             </select>
           </div>
 
-          {/* Results Count */}
           <div className="results-info">
-            Showing {filteredApps.length} of {applications.length} applications
+            Showing {filteredApps.length} of {applications.length}
           </div>
 
-          {/* Applications Table */}
+          {/* TABLE */}
           <div className="table-container">
             <table className="applications-table">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Student Name</th>
-                  <th>Grade Applied</th>
-                  <th>Parent Email</th>
-                  <th>Contact Number</th>
-                  <th>Date of Birth</th>
-                  <th>Applied On</th>
+                  <th>Student</th>
+                  <th>Grade</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>DOB</th>
+                  <th>Date</th>
+                  <th>Msg</th>
                   <th>Action</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredApps.map((app, index) => (
-                  <tr key={app.id || index}>
+                  <tr key={app?.id || index}>
                     <td>{index + 1}</td>
-                    <td className="student-name">{app.student_name}</td>
+                    <td>{app?.student_name || "-"}</td>
+                    <td>{app?.grade_applied || "-"}</td>
+                    <td>{app?.parent_email || "-"}</td>
+                    <td>{app?.contact_number || "-"}</td>
                     <td>
-                      <span className="grade-badge">{app.grade_applied}</span>
+                      {app?.date_of_birth
+                        ? new Date(app.date_of_birth).toLocaleDateString()
+                        : "-"}
                     </td>
-                    <td>{app.parent_email}</td>
-                    <td>{app.contact_number}</td>
-                    <td>{new Date(app.date_of_birth).toLocaleDateString()}</td>
-                    <td>{new Date(app.created_at || app.submitted_at).toLocaleDateString()}</td>
+                    <td>
+                      {app?.created_at || app?.submitted_at
+                        ? new Date(
+                            app.created_at || app.submitted_at
+                          ).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>{app?.message ? "✓" : "-"}</td>
                     <td>
                       <button
                         className="view-btn"
@@ -174,98 +197,71 @@ export default function ApplicationsViewer() {
         </>
       )}
 
-      {/* Detail Modal */}
+      {/* MODAL */}
       {selectedApp && (
-        <div className="modal-overlay" onClick={() => setSelectedApp(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedApp(null)}
+        >
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <h2>Application Details</h2>
-              <button className="close-btn" onClick={() => setSelectedApp(null)}>✕</button>
+              <button onClick={() => setSelectedApp(null)}>✕</button>
             </div>
 
             <div className="modal-body">
-              <div className="detail-section">
-                <h3>👤 Student Information</h3>
-                <div className="detail-row">
-                  <span className="detail-label">Student Name:</span>
-                  <span className="detail-value">{selectedApp.student_name}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Date of Birth:</span>
-                  <span className="detail-value">
-                    {new Date(selectedApp.date_of_birth).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
 
-              <div className="detail-section">
-                <h3>👨‍👩‍👧 Parent/Guardian Information</h3>
-                <div className="detail-row">
-                  <span className="detail-label">Parent Name:</span>
-                  <span className="detail-value">{selectedApp.parent_name}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Parent Email:</span>
-                  <span className="detail-value">
-                    <a href={`mailto:${selectedApp.parent_email}`}>
-                      {selectedApp.parent_email}
-                    </a>
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Contact Number:</span>
-                  <span className="detail-value">
-                    <a href={`tel:${selectedApp.contact_number}`}>
-                      {selectedApp.contact_number}
-                    </a>
-                  </span>
-                </div>
-              </div>
+              <h3>Student</h3>
+              <p>{selectedApp?.student_name || "-"}</p>
 
-              <div className="detail-section">
-                <h3>🎓 Application Details</h3>
-                <div className="detail-row">
-                  <span className="detail-label">Grade Applied For:</span>
-                  <span className="detail-value grade-badge">
-                    {selectedApp.grade_applied}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Applied On:</span>
-                  <span className="detail-value">
-                    {new Date(selectedApp.created_at || selectedApp.submitted_at).toLocaleString()}
-                  </span>
-                </div>
-                {selectedApp.status && (
-                  <div className="detail-row">
-                    <span className="detail-label">Status:</span>
-                    <span className={`status-badge ${selectedApp.status}`}>
-                      {selectedApp.status.toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <h3>Parent</h3>
+              <p>{selectedApp?.parent_name || "-"}</p>
 
+              <h3>Contact</h3>
+              <p>{selectedApp?.parent_email || "-"}</p>
+              <p>{selectedApp?.contact_number || "-"}</p>
+
+              <h3>Grade</h3>
+              <p>{selectedApp?.grade_applied || "-"}</p>
+
+              <h3>Date</h3>
+              <p>
+                {selectedApp?.created_at
+                  ? new Date(selectedApp.created_at).toLocaleString()
+                  : "-"}
+              </p>
+
+              <h3>Message</h3>
+              <p style={{ whiteSpace: "pre-wrap", minHeight: 80 }}>
+                {selectedApp?.message || "-"}
+              </p>
               <div className="modal-actions">
-                <button 
-                  className="action-btn primary"
-                  onClick={() => window.location.href = `mailto:${selectedApp.parent_email}`}
+                <button
+                  onClick={() =>
+                    window.open(
+                      `mailto:${selectedApp?.parent_email || ""}`
+                    )
+                  }
                 >
-                  📧 Email Parent
+                  Email
                 </button>
-                <button 
-                  className="action-btn secondary"
-                  onClick={() => window.location.href = `tel:${selectedApp.contact_number}`}
+
+                <button
+                  onClick={() =>
+                    window.open(`tel:${selectedApp?.contact_number || ""}`)
+                  }
                 >
-                  📞 Call Parent
+                  Call
                 </button>
-                <button 
-                  className="action-btn"
-                  onClick={() => setSelectedApp(null)}
-                >
+
+                <button onClick={() => setSelectedApp(null)}>
                   Close
                 </button>
               </div>
+
             </div>
           </div>
         </div>

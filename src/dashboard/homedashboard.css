@@ -25,6 +25,44 @@
   color: #00c6ff;
 }
 
+.upload-section {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 24px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.upload-section h3 {
+  margin-bottom: 16px;
+  color: #70e4ff;
+}
+
+.home-dashboard .gallery-upload input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: #000;
+}
+
+.home-dashboard .gallery-upload button {
+  margin-top: 12px;
+  padding: 11px 18px;
+  background: #00c6ff;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.home-dashboard .gallery-upload button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .home-dashboard label {
   display: block;
   margin-top: 10px;
