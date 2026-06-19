@@ -46,7 +46,7 @@
 .about-preview,
 .values-section,
 .features-section,
-.mission-section,
+.achievements-section,
 .testimonial-section {
   max-width: 1140px;
   margin: 2rem auto;
@@ -56,7 +56,8 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.about-preview p {
+.about-preview p,
+.achievements-section p {
   color: #333;
   line-height: 1.6;
   font-size: 1rem;
@@ -64,7 +65,8 @@
 
 .values-section h3,
 .features-section h3,
-.mission-section h3 {
+.achievements-section h3,
+.testimonial-section h3 {
   text-align: center;
   color: #0a1a8a;
   margin-bottom: 1rem;

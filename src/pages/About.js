@@ -150,6 +150,18 @@ export default function About() {
               : normalizedFallback.achievements
         };
 
+        // Preserve image fields from localStorage if API doesn't return them
+        const imageFields = [
+          'director_image',
+          'head_teacher_image',
+          'deputy_head_teacher_image'
+        ];
+        imageFields.forEach((field) => {
+          if ((!merged[field] || merged[field] === '') && normalizedFallback[field]) {
+            merged[field] = normalizedFallback[field];
+          }
+        });
+
         // If the server returned leadership entries but omitted photos,
         // prefer photos from the local fallback so uploaded images still show.
         const mergedWithPhotos = { ...merged };
@@ -239,9 +251,10 @@ export default function About() {
           <img
             src={heroImage}
             alt="School"
-            loading="lazy"
             onError={(e) => {
-              e.target.src = "/images/placeholder.jpg";
+              if (e.target.src !== "/images/placeholder.jpg") {
+                e.target.src = "/images/placeholder.jpg";
+              }
             }}
           />
         )}
@@ -253,7 +266,7 @@ export default function About() {
       </section>
 
       <section className="section foundation">
-        <h3 className="section-title">Our Foundation</h3>
+        <h2 className="section-title">Our Foundation</h2>
         <div className="foundation-grid">
           <div className="foundation-card">
             <div className="card-header">
@@ -273,7 +286,7 @@ export default function About() {
       </section>
 
       <section className="section leadership">
-        <h3 className="section-title">Our Leadership</h3>
+        <h2 className="section-title">Our Leadership</h2>
         <div className="leaders">
           {data.leadership.map((leader, index) => {
             const leaderPhoto = getLeaderPhoto(leader);
@@ -284,9 +297,10 @@ export default function About() {
                     <img
                       src={leaderPhoto}
                       alt={leader.name ? `${leader.name} photo` : "Leader photo"}
-                      loading="lazy"
                       onError={(e) => {
-                        e.target.src = "/images/placeholder.jpg";
+                        if (e.target.src !== "/images/placeholder.jpg") {
+                          e.target.src = "/images/placeholder.jpg";
+                        }
                       }}
                     />
                   ) : (
@@ -304,7 +318,7 @@ export default function About() {
       </section>
 
       <section className="section achievements">
-        <h3 className="section-title">Our Achievements</h3>
+        <h2 className="section-title">Our Achievements</h2>
         {Array.isArray(data.achievements) && data.achievements.length > 0 ? (
           <div className="achievements-list">
             {data.achievements.map((item, index) => (

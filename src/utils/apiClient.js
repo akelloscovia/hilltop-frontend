@@ -1,7 +1,7 @@
 // API utility with timeout and error handling
 import * as mockData from './mockData';
 
-const API_BASE_URL = (process.env.REACT_APP_API_URL || '').replace(/\/+$/, '');
+const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000').replace(/\/\/+$/, '');
 const API_VERSION = process.env.REACT_APP_API_VERSION || 'v1';
 const REQUEST_TIMEOUT = 20000; // 20 seconds
 const USE_MOCK_DATA = process.env.REACT_APP_USE_MOCK_DATA === 'true';
@@ -135,7 +135,7 @@ export const apiCall = async (endpoint, options = {}) => {
   }
 
   const url = API_BASE_URL
-    ? `${API_BASE_URL}/${API_VERSION}${endpoint}`
+    ? `${API_BASE_URL}/api/${API_VERSION}${endpoint}`
     : `/api/${API_VERSION}${endpoint}`;
 
   const isFormData = options.body instanceof FormData;
@@ -164,11 +164,11 @@ export const apiCall = async (endpoint, options = {}) => {
 
   const parseJsonSafe = async (response) => {
     const text = await response.text();
-    if (!text) return {};
+    if (!text) return { parsed: {}, text: '' };
     try {
-      return JSON.parse(text);
+      return { parsed: JSON.parse(text), text };
     } catch (parseError) {
-      return {};
+      return { parsed: {}, text };
     }
   };
 
@@ -180,13 +180,18 @@ export const apiCall = async (endpoint, options = {}) => {
     });
 
     if (!response.ok) {
-      const errorData = await parseJsonSafe(response);
-      const apiError = new Error(errorData.error || `HTTP ${response.status}`);
+      const { parsed, text } = await parseJsonSafe(response);
+      const message = (parsed && (parsed.error || parsed.message)) || text || `HTTP ${response.status}`;
+      const apiError = new Error(message);
       apiError.status = response.status;
+      apiError.body = text;
+      apiError.parsed = parsed;
+      console.error(`API response error ${response.status}:`, text || parsed);
       throw apiError;
     }
 
-    return await parseJsonSafe(response);
+    const { parsed } = await parseJsonSafe(response);
+    return parsed;
   } catch (error) {
     console.error('API Error:', error);
 

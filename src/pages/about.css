@@ -64,13 +64,14 @@
 
 .section-title {
   text-align: center;
+  text-transform: uppercase;
   background: #0a1a8a;
   color: white;
-  padding: 12px 16px;
-  border-radius: 16px;
-  margin-bottom: 22px;
-  font-size: 1.05rem;
-  letter-spacing: 0.02em;
+  padding: 14px 18px;
+  border-radius: 18px;
+  margin-bottom: 24px;
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
 }
 
 .foundation-grid {

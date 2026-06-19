@@ -85,12 +85,52 @@
   line-height: 1.68;
 }
 
-.academic-card-section {
+.programs-highlights-section {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+  grid-template-columns: 1fr 360px;
   gap: 22px;
   padding: 24px;
   background: #f7f9ff;
+}
+
+.programs-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.programs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.highlights-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.highlights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.highlight-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e6eefc;
+}
+
+.highlight-item .bullet {
+  color: #0a2f92;
+  font-weight: 800;
+  line-height: 1.4;
 }
 
 .academic-card-list {

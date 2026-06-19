@@ -196,6 +196,30 @@ export default function Home() {
             return deduplicated;
           })()
         });
+
+        // Try to merge additional fields from /about if available
+        try {
+          const aboutRaw = await apiGet("/about");
+          let aboutData = unwrapPayload(aboutRaw) || {};
+          if (Array.isArray(aboutData) && aboutData.length > 0) aboutData = aboutData[0];
+
+          setContent((prev) => {
+            const mergedCore = deduplicateCoreValues(
+              normalizeCoreValues(data).length > 0 ? normalizeCoreValues(data) : normalizeCoreValues(aboutData || {})
+            );
+
+            return {
+              ...prev,
+              vision: prev.vision || aboutData.vision || aboutData.about_text || "",
+              mission: prev.mission || aboutData.mission || "",
+              coreValues: (Array.isArray(mergedCore) && mergedCore.length > 0) ? mergedCore : prev.coreValues,
+              leadership: aboutData.leadership || aboutData.team || aboutData.staff || fallback?.leadership || undefined,
+              achievements: aboutData.achievements || aboutData.achievement || fallback?.achievements || ""
+            };
+          });
+        } catch (err) {
+          // ignore about merge errors
+        }
       } catch (err) {
         console.error("Home fetch error:", err);
         const fallback = loadHomeFallback();
@@ -288,11 +312,37 @@ export default function Home() {
         </div>
       </section>
 
-      {(content.vision || content.mission) && (
-        <section className="mission-section">
-          <h3>Our Vision & Mission</h3>
-          {content.vision && <p><strong>Vision:</strong> {content.vision}</p>}
-          {content.mission && <p><strong>Mission:</strong> {content.mission}</p>}
+      <section className="achievements-section">
+        <h3>We strive for high standards in learning and behavior.</h3>
+        <p>
+          Hilltop Junior School is a warm and vibrant learning community offering Day care, Kindergarten, and Primary education. The school provides a safe and nurturing environment where children grow academically, socially, and morally. With dedicated teachers, engaging learning experiences, and supportive care at every stage, Hilltop ensures learners build a strong foundation and develop the confidence and skills they need to succeed.
+        </p>
+      </section>
+
+      {((Array.isArray(content.leadership) && content.leadership.length > 0) || content.director || content.head_teacher || content.deputy_head_teacher) && (
+        <section className="leadership-section">
+          <h3>Leadership</h3>
+          <div className="leadership-cards">
+            {Array.isArray(content.leadership) && content.leadership.length > 0
+              ? content.leadership.map((l, i) => (
+                  <div className="leader" key={i}>
+                    {l.photo && <img src={getImageUrl(l.photo)} alt={l.name || l.title || `leader-${i}`} />}
+                    <h4>{l.name || l.title || l.position}</h4>
+                    {l.role && <p>{l.role}</p>}
+                  </div>
+                ))
+              : [
+                  { name: content.director, role: 'Director', photo: content.director_image },
+                  { name: content.head_teacher, role: 'Head Teacher', photo: content.head_teacher_image },
+                  { name: content.deputy_head_teacher, role: 'Deputy Head Teacher', photo: content.deputy_head_teacher_image }
+                ].filter(item => item.name || item.photo).map((l, i) => (
+                  <div className="leader" key={i}>
+                    {l.photo && <img src={getImageUrl(l.photo)} alt={l.name || `leader-${i}`} />}
+                    <h4>{l.name}</h4>
+                    <p>{l.role}</p>
+                  </div>
+                ))}
+          </div>
         </section>
       )}
     </div>

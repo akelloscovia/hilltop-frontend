@@ -101,9 +101,9 @@ export default function Academics() {
     >
       <div className="academics-content">
         <section className="academics-hero">
-          <h2>{data.title || "Not set in dashboard"}</h2>
-          <h3 className="highlight">{data.subtitle || ""}</h3>
-          <p>{data.description || ""}</p>
+          <h2>{data.title || "Programs and Highlights"}</h2>
+          <h3 className="highlight">{data.subtitle || "Key programs offered at Hilltop Junior School"}</h3>
+          <p>{data.description || "We provide a balanced curriculum aligned with the Uganda Primary syllabus, focusing on literacy, numeracy, critical thinking and character formation."}</p>
         </section>
 
         {(data.excellence || data.approach) && (
@@ -125,35 +125,83 @@ export default function Academics() {
           </section>
         )}
 
-        <section className="academic-card-section">
-          <div className="academic-card-list">
-            <h3 className="section-title">Programs & Highlights</h3>
-            {Array.isArray(data.cards) && data.cards.length > 0 ? (
-              <div className="academic-card-grid">
-                {data.cards.map((card, index) => (
-                  <div key={index} className="academic-card">
-                    <h4>{card?.title || ""}</h4>
-                    <p>{card?.content || ""}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>No academic programs set in dashboard yet.</p>
-            )}
+        <section className="programs-highlights-section">
+          <div className="programs-column">
+            <h3 className="section-title">Programs</h3>
+            <div className="programs-grid">
+              {(Array.isArray(data.cards) && data.cards.length > 0 ? data.cards : [
+                {
+                  title: "Early Childhood & Daycare",
+                  content:
+                    "Caring early years provision that supports social, emotional and foundational learning for pre-school children. Play-based activities prepare children for formal schooling."
+                },
+                {
+                  title: "Kindergarten/Foundation",
+                  content:
+                    "Structured kindergarten that introduces literacy, numeracy and basic life skills. Focus on readiness for Primary 1 and building confidence."
+                },
+                {
+                  title: "Primary Curriculum & PLE Preparation",
+                  content:
+                    "A curriculum aligned with the Uganda Ministry of Education focusing on English, Mathematics, Science, Social Studies and Religious Education. Pupils are prepared for the Primary Leaving Examinations (PLE) through continuous assessment and targeted revision."
+                },
+                {
+                  title: "Co-curricular Activities",
+                  content:
+                    "Sports (football, netball), music, drama, and school clubs (STEM, reading, environment) that build teamwork, leadership and practical skills."
+                },
+                {
+                  title: "Pastoral Care & Character Formation",
+                  content:
+                    "A strong pastoral program promoting discipline, good behavior, moral values and child protection. Emphasis on positive habits and community responsibility."
+                },
+                {
+                  title: "ICT & Life Skills",
+                  content:
+                    "Introduction to basic ICT, practical subjects and vocational-minded activities to equip learners with modern skills and problem-solving ability."
+                }
+              ]).map((card, idx) => (
+                <div key={idx} className="academic-card">
+                  <h4>{card.title}</h4>
+                  <p>{card.content}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {heroImage && (
-            <div className="academic-image">
-              <img
-                src={heroImage}
-                alt="students"
-                loading="lazy"
-                onError={(e) => {
-                  e.target.src = "/images/placeholder.jpg";
-                }}
-              />
+          <aside className="highlights-column">
+            <h3 className="section-title">Highlights</h3>
+            <div className="highlights-list">
+              {(Array.isArray(data.highlights) && data.highlights.length > 0
+                ? data.highlights
+                : [
+                    "Strong PLE preparation with a history of good results and continuous assessment.",
+                    "Low teacher-to-pupil ratio enabling individual attention and mentoring.",
+                    "Active sports and arts programs including football, netball, music and drama.",
+                    "Regular community engagement and parental involvement in school activities.",
+                    "Emphasis on values: discipline, respect, responsibility and kindness.",
+                    "Practical ICT exposure and life skills to prepare pupils for modern learning."
+                  ]).map((h, i) => (
+                <div key={i} className="highlight-item">
+                  <span className="bullet">•</span>
+                  <p>{h}</p>
+                </div>
+              ))}
             </div>
-          )}
+
+            {heroImage && (
+              <div className="academic-image">
+                <img
+                  src={heroImage}
+                  alt="students"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.src = "/images/placeholder.jpg";
+                  }}
+                />
+              </div>
+            )}
+          </aside>
         </section>
 
         <section className="academic-additional">
