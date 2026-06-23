@@ -1,7 +1,7 @@
 // API utility with timeout and error handling
 import * as mockData from './mockData';
 
-const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://127.0.0.1:5000').replace(/\/\/+$/, '');
+const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://api.hilltopjunior.com').replace(/\/\/+$/, '');
 const API_VERSION = process.env.REACT_APP_API_VERSION || 'v1';
 const REQUEST_TIMEOUT = 20000; // 20 seconds
 const USE_MOCK_DATA = process.env.REACT_APP_USE_MOCK_DATA === 'true';

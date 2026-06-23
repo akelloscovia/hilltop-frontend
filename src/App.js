@@ -12,6 +12,7 @@ import { SkeletonPage } from "./components/Skeleton";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminLogin from "./components/AdminLogin";
 
 // PUBLIC PAGES
 const Home = lazy(() => import("./pages/Home"));
@@ -23,7 +24,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 const ParentPortal = lazy(() => import("./pages/ParentPortal"));
 
 // ADMIN AUTH
-const AdminLogin = lazy(() => import("./components/AdminLogin"));
+
 
 // DASHBOARD LAYOUT
 const DashboardLayout = lazy(() => import("./components/Dashboardlayout"));

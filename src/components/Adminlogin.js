@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import "./adminlogin.css";
 
 export default function AdminLogin() {
+  console.log("AdminLogin loaded");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL;
-  const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD;
-  const ADMIN_TOKEN_KEY = process.env.REACT_APP_ADMIN_TOKEN_KEY || "adminToken";
-
+  const ADMIN_EMAIL = "";
+  const ADMIN_PASSWORD = "";
+  const ADMIN_TOKEN_KEY = "adminToken";
   const handleSubmit = (e) => {
     e.preventDefault();
 
