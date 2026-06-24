@@ -158,10 +158,10 @@ export const apiCall = async (endpoint, options = {}) => {
   const body = !hasBody
     ? undefined
     : isFormData
-    ? options.body
-    : typeof options.body === 'string'
-    ? options.body
-    : JSON.stringify(options.body);
+      ? options.body
+      : typeof options.body === 'string'
+        ? options.body
+        : JSON.stringify(options.body);
 
 
   const parseJsonSafe = async (response) => {
