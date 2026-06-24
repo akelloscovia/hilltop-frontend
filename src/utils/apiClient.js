@@ -195,7 +195,7 @@ export const apiCall = async (endpoint, options = {}) => {
     const { parsed } = await parseJsonSafe(response);
     return parsed;
   } catch (error) {
-    console.error('API Error:', error);
+    console.warn('API Warning (will use fallback if available):', error.message || error);
 
     const shouldUseMockFallback =
       mockDataMap[endpoint] &&

@@ -190,10 +190,7 @@ export default function Home() {
           mission: data.mission || fallback?.mission || "",
           coreValues: (() => {
             const normalized = normalizeCoreValues(data).length > 0 ? normalizeCoreValues(data) : normalizeCoreValues(fallback || {});
-            console.log('Normalized core values:', normalized);
-            const deduplicated = deduplicateCoreValues(normalized);
-            console.log('Deduplicated core values:', deduplicated);
-            return deduplicated;
+            return deduplicateCoreValues(normalized);
           })()
         });
 
@@ -244,10 +241,7 @@ export default function Home() {
           mission: fallback?.mission || "",
           coreValues: (() => {
             const normalized = normalizeCoreValues(fallback || {});
-            console.log('Fallback normalized core values:', normalized);
-            const deduplicated = deduplicateCoreValues(normalized);
-            console.log('Fallback deduplicated core values:', deduplicated);
-            return deduplicated;
+            return deduplicateCoreValues(normalized);
           })()
         });
       } finally {
