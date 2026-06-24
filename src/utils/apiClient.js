@@ -6,6 +6,8 @@ const API_VERSION = process.env.REACT_APP_API_VERSION || 'v1';
 const REQUEST_TIMEOUT = 20000; // 20 seconds
 const USE_MOCK_DATA = process.env.REACT_APP_USE_MOCK_DATA === 'true';
 
+const PAGE_FALLBACK_ENDPOINTS = new Set(['/home', '/about', '/gallery']);
+
 // Map endpoints to mock data
 const mockDataMap = {
   '/home': mockData.mockHomeData,
@@ -195,8 +197,15 @@ export const apiCall = async (endpoint, options = {}) => {
   } catch (error) {
     console.error('API Error:', error);
 
-    if (USE_MOCK_DATA && mockDataMap[endpoint]) {
-      console.warn(`API failed for ${endpoint}, using fallback mock data`);
+    const shouldUseMockFallback =
+      mockDataMap[endpoint] &&
+      (USE_MOCK_DATA ||
+        error?.status === 404 ||
+        /not found|timeout|failed to fetch/i.test(error?.message || ""));
+
+    if (shouldUseMockFallback) {
+      const fallbackType = USE_MOCK_DATA ? 'mock config' : 'fallback page data';
+      console.warn(`API failed for ${endpoint}, using ${fallbackType}`);
       return mockDataMap[endpoint];
     }
 
