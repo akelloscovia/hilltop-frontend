@@ -72,3 +72,4 @@ export const schemaData = {
     'telephoneNumber': '+256 771 234 567'
   }
 };
+

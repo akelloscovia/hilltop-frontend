@@ -61,3 +61,4 @@ export const mockFooterData = {
   footer_text: "All rights reserved. Our Institution.",
   social_media_links: { facebook: "#", twitter: "#", instagram: "#" }
 };
+

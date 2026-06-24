@@ -233,3 +233,4 @@ export const apiPutForm = (endpoint, data) => apiCall(endpoint, {
 
 // DELETE request
 export const apiDelete = (endpoint) => apiCall(endpoint, { method: 'DELETE' });
+

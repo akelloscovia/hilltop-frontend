@@ -1,4 +1,4 @@
-﻿.admissions-dashboard {
+.admissions-dashboard {
   min-height: 100vh;
   padding: 32px 24px;
   background: linear-gradient(180deg, #06112f 0%, #0f3c9e 100%);
@@ -335,3 +335,4 @@
     max-width: 100%;
   }
 }
+

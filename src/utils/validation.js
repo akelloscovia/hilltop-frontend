@@ -98,3 +98,4 @@ export const validateContactForm = (formData) => {
 
   return errors;
 };
+

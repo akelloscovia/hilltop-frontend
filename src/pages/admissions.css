@@ -1,4 +1,4 @@
-﻿.admissions-page {
+.admissions-page {
   min-height: calc(100vh - 90px);
   padding: 40px 18px 55px;
   position: relative;
@@ -411,3 +411,4 @@
   color: #b91c1c;
   font-size: 0.9rem;
 }
+

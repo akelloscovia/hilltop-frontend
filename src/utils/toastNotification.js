@@ -26,3 +26,4 @@ export const subscribeToToasts = (listener) => {
   listeners.add(listener);
   return () => listeners.delete(listener);
 };
+
