@@ -1,12 +1,11 @@
 // API utility with timeout and error handling
 import * as mockData from './mockData';
 
-const API_BASE_URL = (process.env.REACT_APP_API_URL || 'https://school-management-q35g.onrender.com/').replace(/\/\/+$/, '');
+const API_BASE_URL = (process.env.REACT_APP_API_URL || 'https://school-management-q35g.onrender.com').replace(/\/+$/, '');
 const API_VERSION = process.env.REACT_APP_API_VERSION || 'v1';
 const REQUEST_TIMEOUT = 20000; // 20 seconds
 const USE_MOCK_DATA = process.env.REACT_APP_USE_MOCK_DATA === 'true';
 
-const PAGE_FALLBACK_ENDPOINTS = new Set(['/home', '/about', '/gallery']);
 
 // Map endpoints to mock data
 const mockDataMap = {
@@ -136,8 +135,12 @@ export const apiCall = async (endpoint, options = {}) => {
     }
   }
 
+  const baseWithVersion = API_BASE_URL.includes('/api')
+    ? `${API_BASE_URL.replace(/\/api.*$/, '')}/api/${API_VERSION}`
+    : `${API_BASE_URL}/api/${API_VERSION}`;
+
   const url = API_BASE_URL
-    ? `${API_BASE_URL}/api/${API_VERSION}${endpoint}`
+    ? `${baseWithVersion}${endpoint}`
     : `/api/${API_VERSION}${endpoint}`;
 
   const isFormData = options.body instanceof FormData;
