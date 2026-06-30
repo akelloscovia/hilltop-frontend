@@ -354,9 +354,9 @@
     height: 2px;
   }
 }
-    max-height: 420px;
+   max-height: 420px;
     padding: 0.75rem 0;
-  }
+  
 
   .navbar-links a {
     width: 100%;
@@ -373,7 +373,7 @@
   .navbar-brand-text {
     display: none;
   }
-}
+
 
 @media (max-width: 480px) {
   .navbar {
