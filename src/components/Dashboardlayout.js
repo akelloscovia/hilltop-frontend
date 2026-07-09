@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
 // import DashboardCards from "./Dashboardlayout";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import "./dashboard.css";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/admin/login");
   };
 
   return (
@@ -53,11 +52,10 @@ export default function DashboardLayout() {
 
         {/* CONTENT */}
         <main className="dashboard-main">
-
-         
-          {/* NESTED ROUTES */}
-          <Outlet />
-
+          <div className="dashboard-content-shell">
+            {/* NESTED ROUTES */}
+            <Outlet />
+          </div>
         </main>
 
       </div>

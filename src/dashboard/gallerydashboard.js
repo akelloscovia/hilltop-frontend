@@ -67,7 +67,7 @@ export default function GalleryDashboard() {
   const [message, setMessage] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  const loadGalleryFromStorage = () => {
+  const loadGalleryFromStorage = React.useCallback(() => {
     try {
       const saved = localStorage.getItem(LOCAL_GALLERY_KEY);
       return saved ? JSON.parse(saved) : [];
@@ -75,17 +75,17 @@ export default function GalleryDashboard() {
       console.error("Could not read gallery fallback from localStorage", err);
       return [];
     }
-  };
+  }, []);
 
-  const saveGalleryToStorage = (normalizedImages) => {
+  const saveGalleryToStorage = React.useCallback((normalizedImages) => {
     try {
       localStorage.setItem(LOCAL_GALLERY_KEY, JSON.stringify(normalizedImages));
     } catch (err) {
-      console.error("Could not save gallery fallback to localStorage", err);
+      console.error("Could not save gallery fallback from localStorage", err);
     }
-  };
+  }, []);
 
-  const fetchImages = async () => {
+  const fetchImages = React.useCallback(async () => {
     try {
       const rawData = await apiGet("/gallery");
       const data = unwrapPayload(rawData) || {};
@@ -110,11 +110,11 @@ export default function GalleryDashboard() {
         setMessage("❌ Unable to load gallery images");
       }
     }
-  };
+  }, [loadGalleryFromStorage, saveGalleryToStorage]);
 
   useEffect(() => {
     fetchImages();
-  }, []);
+  }, [fetchImages]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files || []);

@@ -18,15 +18,22 @@ const loadHomeFallback = () => {
 
 const getImageUrl = (value) => {
   if (!value) return "";
-  if (
-    value.startsWith("http") ||
-    value.startsWith("data:") ||
-    value.startsWith("blob:")
-  ) {
-    return value;
+  if (typeof value !== "string") {
+    return "";
   }
-  if (API_BASE_URL) return `${API_BASE_URL}/${value}`;
-  return value.startsWith("/") ? value : `/${value}`;
+
+  const cleanValue = value.trim();
+  if (!cleanValue) return "";
+  if (
+    cleanValue.startsWith("http") ||
+    cleanValue.startsWith("data:") ||
+    cleanValue.startsWith("blob:")
+  ) {
+    return cleanValue;
+  }
+  if (cleanValue.startsWith("/api/")) return cleanValue;
+  if (API_BASE_URL) return `${API_BASE_URL}/${cleanValue.replace(/^\/+/, "")}`;
+  return cleanValue.startsWith("/") ? cleanValue : `/${cleanValue}`;
 };
 
 const unwrapPayload = (payload) => {
@@ -43,10 +50,34 @@ const unwrapPayload = (payload) => {
 
 const resolveGalleryImages = (data) => {
   if (!data) return [];
-  if (Array.isArray(data)) data = data[0] || {};
-  if (Array.isArray(data.gallery_images)) return data.gallery_images;
-  if (Array.isArray(data.images)) return data.images;
-  if (Array.isArray(data.gallery)) return data.gallery;
+
+  const normalizeCandidate = (item) => {
+    if (typeof item === "string") return item.trim();
+    if (item && typeof item === "object") {
+      return item.image || item.image_url || item.url || item.src || item.filename || "";
+    }
+    return "";
+  };
+
+  if (Array.isArray(data)) {
+    return data
+      .map(normalizeCandidate)
+      .filter(Boolean);
+  }
+
+  const candidates = Array.isArray(data.gallery_images)
+    ? data.gallery_images
+    : Array.isArray(data.images)
+    ? data.images
+    : Array.isArray(data.gallery)
+    ? data.gallery
+    : [];
+
+  if (candidates.length > 0) {
+    return candidates
+      .map(normalizeCandidate)
+      .filter(Boolean);
+  }
 
   const raw = data.gallery_images || data.images || data.gallery;
   if (typeof raw === "string") {
@@ -58,13 +89,30 @@ const resolveGalleryImages = (data) => {
   return [];
 };
 
+const normalizeCoreValue = (value) => {
+  if (typeof value === "string") return value.trim();
+  if (value && typeof value === "object") {
+    return value.title || value.name || value.label || value.value || "";
+  }
+  return "";
+};
+
 const normalizeCoreValues = (data) => {
-  if (Array.isArray(data.core_values)) return data.core_values;
-  if (Array.isArray(data.coreValues)) return data.coreValues;
-  const raw = data.core_values || data.coreValues;
+  const raw = Array.isArray(data?.core_values)
+    ? data.core_values
+    : Array.isArray(data?.coreValues)
+    ? data.coreValues
+    : data?.core_values || data?.coreValues;
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map(normalizeCoreValue)
+      .filter(Boolean);
+  }
+
   if (typeof raw === "string") {
     return raw
-      .split(/\n|\r|,/) 
+      .split(/\n|\r|,|•/) 
       .map((item) => item.trim())
       .filter(Boolean);
   }
@@ -72,22 +120,19 @@ const normalizeCoreValues = (data) => {
 };
 
 const deduplicateCoreValues = (values) => {
-  if (!Array.isArray(values)) return values;
+  if (!Array.isArray(values)) return [];
   const seen = new Set();
-  return values.filter((value) => {
-    let key;
-    if (typeof value === 'object' && value !== null) {
-      // For objects, create a unique key from all properties
-      key = JSON.stringify(value).toLowerCase();
-    } else {
-      // For strings, normalize by lowercasing and trimming
-      key = String(value).toLowerCase().trim();
-    }
-    
-    if (seen.has(key)) return false;
+  return values.reduce((acc, value) => {
+    const normalizedValue = normalizeCoreValue(value);
+    if (!normalizedValue) return acc;
+
+    const key = normalizedValue.toLowerCase().trim();
+    if (seen.has(key)) return acc;
+
     seen.add(key);
-    return true;
-  });
+    acc.push(normalizedValue);
+    return acc;
+  }, []);
 };
 
 const loadGalleryFallback = () => {
@@ -189,8 +234,11 @@ export default function Home() {
           vision: data.vision || fallback?.vision || "",
           mission: data.mission || fallback?.mission || "",
           coreValues: (() => {
-            const normalized = normalizeCoreValues(data).length > 0 ? normalizeCoreValues(data) : normalizeCoreValues(fallback || {});
-            return deduplicateCoreValues(normalized);
+            const normalized = deduplicateCoreValues([
+              ...normalizeCoreValues(data),
+              ...normalizeCoreValues(fallback || {})
+            ]);
+            return normalized;
           })()
         });
 
@@ -201,9 +249,10 @@ export default function Home() {
           if (Array.isArray(aboutData) && aboutData.length > 0) aboutData = aboutData[0];
 
           setContent((prev) => {
-            const mergedCore = deduplicateCoreValues(
-              normalizeCoreValues(data).length > 0 ? normalizeCoreValues(data) : normalizeCoreValues(aboutData || {})
-            );
+            const mergedCore = deduplicateCoreValues([
+              ...normalizeCoreValues(data),
+              ...normalizeCoreValues(aboutData || {})
+            ]);
 
             return {
               ...prev,
@@ -240,8 +289,8 @@ export default function Home() {
           vision: fallback?.vision || "",
           mission: fallback?.mission || "",
           coreValues: (() => {
-            const normalized = normalizeCoreValues(fallback || {});
-            return deduplicateCoreValues(normalized);
+            const normalized = deduplicateCoreValues(normalizeCoreValues(fallback || {}));
+            return normalized;
           })()
         });
       } finally {

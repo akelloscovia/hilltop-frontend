@@ -12,9 +12,13 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || "";
 
 const buildImageUrl = (value) => {
   if (!value) return "";
-  if (value.startsWith("http")) return value;
-  if (API_BASE_URL) return `${API_BASE_URL}/${value}`;
-  return value.startsWith("/") ? value : `/${value}`;
+  if (typeof value !== "string") return "";
+  const cleanValue = value.trim();
+  if (!cleanValue) return "";
+  if (cleanValue.startsWith("http") || cleanValue.startsWith("data:") || cleanValue.startsWith("blob:")) return cleanValue;
+  if (cleanValue.startsWith("/api/")) return cleanValue;
+  if (API_BASE_URL) return `${API_BASE_URL}/${cleanValue.replace(/^\/+/, "")}`;
+  return cleanValue.startsWith("/") ? cleanValue : `/${cleanValue}`;
 };
 const LOCAL_HOME_KEY = "dashboard_home_data";
 
@@ -49,7 +53,7 @@ const saveHomeDataToStorage = (payload) => {
 };
 
 export default function Home() {
-  const [heroImage, setHeroImage] = useState(homeImages[0]);
+  const [, setHeroImage] = useState(homeImages[0]);
   const [content, setContent] = useState({
     title: "Hilltop Junior School Kasangati",
     subtitle: "Welcome to our school",
@@ -137,15 +141,20 @@ export default function Home() {
     (async () => {
       const extractFirstImageUrl = (g) => {
         if (!g) return null;
-        let arr = [];
-        if (Array.isArray(g)) arr = g;
-        else if (Array.isArray(g.gallery_images)) arr = g.gallery_images;
-        else if (Array.isArray(g.images)) arr = g.images;
-        if (!arr || arr.length === 0) return null;
+
+        const arr = Array.isArray(g)
+          ? g
+          : Array.isArray(g.gallery_images)
+          ? g.gallery_images
+          : Array.isArray(g.images)
+          ? g.images
+          : [];
+
+        if (!arr.length) return null;
         const first = arr[0];
         if (!first) return null;
         if (typeof first === 'string') return first;
-        return first.image || first.image_url || first.url || first.src || null;
+        return first.image || first.image_url || first.url || first.src || first.filename || null;
       };
 
       const count = Array.isArray(gallery)
@@ -161,7 +170,6 @@ export default function Home() {
         const url = buildImageUrl(first);
         setHeroImage(url);
 
-        // Persist hero image to backend; fallback to local storage on failure
         try {
           await apiPut('/home', { hero_image: first });
           const existing = loadHomeDataFromStorage() || {};

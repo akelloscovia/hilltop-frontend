@@ -49,7 +49,7 @@ const resolveLeadership = (data) => {
 
   if (typeof data.leadership === "string") {
     return data.leadership
-      .split(/\n|\r|,|\u2022|\*|\-/)
+      .split(/\n|\r|,|\u2022|\*|-/)
       .map((item) => item.trim())
       .filter(Boolean)
       .map((name) => ({ position: "", name }));
@@ -98,12 +98,12 @@ const normalizeAboutData = (data) => ({
       ? data.achievements
       : typeof data.achievements === "string"
       ? data.achievements
-          .split(/\n|\r|\u2022|\*|\-/)
+          .split(/\n|\r|\u2022|\*|-/)
           .map((item) => item.trim())
           .filter(Boolean)
       : typeof data.achievement === "string"
       ? data.achievement
-          .split(/\n|\r|\u2022|\*|\-/)
+          .split(/\n|\r|\u2022|\*|-/)
           .map((item) => item.trim())
           .filter(Boolean)
       : [],

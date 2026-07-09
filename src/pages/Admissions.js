@@ -19,7 +19,7 @@ export default function Admissions() {
   const [admissionData, setAdmissionData] = useState(null);
   const [heroImage, setHeroImage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState(null);
+  const [, setErr] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -55,9 +55,9 @@ export default function Admissions() {
 
         setHeroImage(img);
         setErr(null);
-      } catch (err) {
-        console.error("Admissions fetch error:", err);
-        setErr(err.message);
+      } catch (error) {
+        console.error("Admissions fetch error:", error);
+        setErr(error.message);
         setAdmissionData({});
         setHeroImage("");
       } finally {
