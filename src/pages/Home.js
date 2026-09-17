@@ -27,7 +27,8 @@ const getImageUrl = (value) => {
   if (
     cleanValue.startsWith("http") ||
     cleanValue.startsWith("data:") ||
-    cleanValue.startsWith("blob:")
+    cleanValue.startsWith("blob:") ||
+    cleanValue.startsWith("/images/")
   ) {
     return cleanValue;
   }
@@ -97,6 +98,21 @@ const normalizeCoreValue = (value) => {
   return "";
 };
 
+const normalizeCoreValueCandidate = (value) => {
+  if (typeof value === "string") {
+    return { title: value.trim(), description: "" };
+  }
+  if (value && typeof value === "object") {
+    const title = value.title || value.name || value.label || value.value || "";
+    const description = value.description || value.text || value.note || "";
+    return {
+      title: title.toString().trim(),
+      description: description.toString().trim()
+    };
+  }
+  return { title: "", description: "" };
+};
+
 const normalizeCoreValues = (data) => {
   const raw = Array.isArray(data?.core_values)
     ? data.core_values
@@ -119,18 +135,49 @@ const normalizeCoreValues = (data) => {
   return [];
 };
 
+const normalizeCoreValuesToObjects = (data) => {
+  const raw = Array.isArray(data?.core_values)
+    ? data.core_values
+    : Array.isArray(data?.coreValues)
+    ? data.coreValues
+    : data?.core_values || data?.coreValues;
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map(normalizeCoreValueCandidate)
+      .filter((value) => value.title);
+  }
+
+  if (typeof raw === "string") {
+    return raw
+      .split(/\n|\r|,|•/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((title) => ({ title, description: "" }));
+  }
+
+  return [];
+};
+
 const deduplicateCoreValues = (values) => {
   if (!Array.isArray(values)) return [];
   const seen = new Set();
   return values.reduce((acc, value) => {
-    const normalizedValue = normalizeCoreValue(value);
-    if (!normalizedValue) return acc;
+    let title = "";
+    let description = "";
+    if (typeof value === "string") {
+      title = value.trim();
+    } else if (value && typeof value === "object") {
+      title = value.title || value.name || value.label || value.value || "";
+      description = value.description || value.text || value.note || "";
+    }
 
-    const key = normalizedValue.toLowerCase().trim();
+    if (!title) return acc;
+    const key = title.toLowerCase().trim();
     if (seen.has(key)) return acc;
 
     seen.add(key);
-    acc.push(normalizedValue);
+    acc.push({ title: title.toString().trim(), description: description.toString().trim() });
     return acc;
   }, []);
 };
@@ -161,6 +208,29 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fallback = loadHomeFallback();
+    if (fallback) {
+      setContent({
+        welcomeText: fallback?.hero_title || fallback?.title || "",
+        subtitle: fallback?.hero_subtitle || fallback?.subtitle || "",
+        intro:
+          firstNonEmpty(
+            fallback?.about_text,
+            fallback?.description,
+            fallback?.intro,
+            fallback?.home_text,
+            fallback?.home_intro,
+            fallback?.body,
+            fallback?.text
+          ) ||
+          "Hilltop Junior School is a warm and vibrant learning community offering Daycare, Kindergarten, and Primary education. We provide a safe, friendly, and inclusive environment where every child thrives.",
+        vision: fallback?.vision || "",
+        mission: fallback?.mission || "",
+        coreValues: deduplicateCoreValues(normalizeCoreValuesToObjects(fallback || {}))
+      });
+      setLoading(false);
+    }
+
     const fetchHomeContent = async () => {
       try {
         const rawData = await apiGet("/home");
@@ -170,7 +240,6 @@ export default function Home() {
         if (Array.isArray(data) && data.length > 0) {
           data = data[0];
         }
-        const fallback = loadHomeFallback();
         console.debug('Home fallback from localStorage:', fallback);
 
         let image = "";
@@ -234,10 +303,9 @@ export default function Home() {
           vision: data.vision || fallback?.vision || "",
           mission: data.mission || fallback?.mission || "",
           coreValues: (() => {
-            const normalized = deduplicateCoreValues([
-              ...normalizeCoreValues(data),
-              ...normalizeCoreValues(fallback || {})
-            ]);
+            const apiValues = normalizeCoreValuesToObjects(data);
+            const fallbackValues = normalizeCoreValuesToObjects(fallback || {});
+            const normalized = deduplicateCoreValues(apiValues.length ? apiValues : fallbackValues);
             return normalized;
           })()
         });
@@ -250,8 +318,8 @@ export default function Home() {
 
           setContent((prev) => {
             const mergedCore = deduplicateCoreValues([
-              ...normalizeCoreValues(data),
-              ...normalizeCoreValues(aboutData || {})
+              ...normalizeCoreValuesToObjects(data),
+              ...normalizeCoreValuesToObjects(aboutData || {})
             ]);
 
             return {
@@ -268,31 +336,7 @@ export default function Home() {
         }
       } catch (err) {
         console.error("Home fetch error:", err);
-        const fallback = loadHomeFallback();
         setHeroImage("");
-        const introFallback =
-          firstNonEmpty(
-            fallback?.about_text,
-            fallback?.description,
-            fallback?.intro,
-            fallback?.home_text,
-            fallback?.home_intro,
-            fallback?.body,
-            fallback?.text
-          ) ||
-          "Hilltop Junior School is a warm and vibrant learning community offering Daycare, Kindergarten, and Primary education. We provide a safe, friendly, and inclusive environment where every child thrives.";
-
-        setContent({
-          welcomeText: fallback?.hero_title || "",
-          subtitle: fallback?.hero_subtitle || "",
-          intro: introFallback,
-          vision: fallback?.vision || "",
-          mission: fallback?.mission || "",
-          coreValues: (() => {
-            const normalized = deduplicateCoreValues(normalizeCoreValues(fallback || {}));
-            return normalized;
-          })()
-        });
       } finally {
         setLoading(false);
       }
@@ -343,12 +387,16 @@ export default function Home() {
         <div className="value-cards">
           {Array.isArray(content.coreValues) &&
           content.coreValues.length > 0 ? (
-            content.coreValues.map((value, index) => (
-              <div className="card" key={index}>
-                <h4>{typeof value === 'object' ? value.title || value.name : value}</h4>
-                <p>{typeof value === 'object' ? value.description || value.text : value}</p>
-              </div>
-            ))
+            content.coreValues.map((value, index) => {
+              const title = typeof value === 'object' ? value.title || value.name : value;
+              const description = typeof value === 'object' ? value.description || value.text : "";
+              return (
+                <div className="card" key={index}>
+                  <h4>{title}</h4>
+                  {description ? <p>{description}</p> : <p>{title}</p>}
+                </div>
+              );
+            })
           ) : (
             <p>No core values set in dashboard yet.</p>
           )}

@@ -217,6 +217,61 @@ export default function AboutDashboard() {
         }));
       }
 
+      // Ensure individual leadership fields are populated from leadership array
+      // so the dashboard form inputs (director, head_teacher, deputy_head_teacher)
+      // continue to show saved names even if the API returns only a
+      // `leadership` array.
+      if (Array.isArray(savedData.leadership) && savedData.leadership.length > 0) {
+        const mapByPosition = (pos) => {
+          const found = savedData.leadership.find((item) => {
+            if (!item) return false;
+            if (!item.position && !item.name) return false;
+            const p = (item.position || "").toLowerCase();
+            const n = (item.name || "").toLowerCase();
+            return p.includes(pos) || n.includes(pos) || p === pos;
+          });
+          return found;
+        };
+
+        const directorEntry = mapByPosition('director') || savedData.leadership[0];
+        const headEntry = mapByPosition('head') || savedData.leadership[1] || savedData.leadership[0];
+        const deputyEntry = mapByPosition('deputy') || savedData.leadership[2] || savedData.leadership[1] || savedData.leadership[0];
+
+        if (directorEntry && directorEntry.name) savedData.director = directorEntry.name;
+        if (headEntry && headEntry.name) savedData.head_teacher = headEntry.name;
+        if (deputyEntry && deputyEntry.name) savedData.deputy_head_teacher = deputyEntry.name;
+
+        // Also populate image fields from leadership entries if available
+        if (directorEntry && (directorEntry.photo || directorEntry.image)) {
+          savedData.director_image = directorEntry.photo || directorEntry.image;
+        }
+        if (headEntry && (headEntry.photo || headEntry.image)) {
+          savedData.head_teacher_image = headEntry.photo || headEntry.image;
+        }
+        if (deputyEntry && (deputyEntry.photo || deputyEntry.image)) {
+          savedData.deputy_head_teacher_image = deputyEntry.photo || deputyEntry.image;
+        }
+      }
+
+      // If the server response omitted simple name fields (check original
+      // `data`), prefer the values we just sent (currentData) so the form
+      // doesn't revert to defaults provided by `normalizeAboutData`.
+      const nameFields = ["director", "head_teacher", "deputy_head_teacher"];
+      nameFields.forEach((f) => {
+        if ((data[f] === undefined || data[f] === null || data[f] === "") && currentData[f]) {
+          savedData[f] = currentData[f];
+        }
+      });
+
+      // Also preserve leadership array names from the currentData if server
+      // returned leadership entries but omitted names.
+      if (Array.isArray(savedData.leadership) && Array.isArray(currentData.leadership)) {
+        savedData.leadership = savedData.leadership.map((l, idx) => ({
+          ...l,
+          name: l.name || (currentData.leadership[idx] && currentData.leadership[idx].name) || l.name
+        }));
+      }
+
       setAboutData(savedData);
       saveAboutDataToStorage(savedData);
       setLeadershipFiles({

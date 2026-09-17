@@ -19,7 +19,7 @@
 .about-dashboard form {
   max-width: 800px;
   margin: auto;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   padding: 30px;
   border-radius: 12px;
   backdrop-filter: blur(6px);
@@ -48,8 +48,8 @@
   border: none;
   border-radius: 8px;
   outline: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+    background: rgba(255, 255, 255, 0.14);
+    color: #012034;
 }
 
 /* TEXTAREA HEIGHT */
@@ -63,17 +63,17 @@
   margin-top: 20px;
   width: 100%;
   padding: 12px;
-  background: #00c6ff;
+  background: #0ea5e9;
   border: none;
   border-radius: 8px;
-  color: #000;
-  font-weight: bold;
+    color: #ffffff;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.15s ease;
 }
 
 .about-dashboard button:hover {
-  background: #00a3cc;
+  background: #087fae;
 }
 
 .preview-image {

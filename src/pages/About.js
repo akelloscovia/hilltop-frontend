@@ -20,7 +20,8 @@ const getImageUrl = (value) => {
   if (
     value.startsWith("http") ||
     value.startsWith("data:") ||
-    value.startsWith("blob:")
+    value.startsWith("blob:") ||
+    value.startsWith("/images/")
   ) {
     return value;
   }

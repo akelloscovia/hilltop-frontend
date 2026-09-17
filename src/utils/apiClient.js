@@ -201,14 +201,12 @@ export const apiCall = async (endpoint, options = {}) => {
     console.warn('API Warning (will use fallback if available):', error.message || error);
 
     const shouldUseMockFallback =
+      USE_MOCK_DATA &&
       mockDataMap[endpoint] &&
-      (USE_MOCK_DATA ||
-        error?.status === 404 ||
-        /not found|timeout|failed to fetch/i.test(error?.message || ""));
+      (error?.status === 404 || /not found|timeout|failed to fetch/i.test(error?.message || ""));
 
     if (shouldUseMockFallback) {
-      const fallbackType = USE_MOCK_DATA ? 'mock config' : 'fallback page data';
-      console.warn(`API failed for ${endpoint}, using ${fallbackType}`);
+      console.warn(`API failed for ${endpoint}, using mock config fallback`);
       return mockDataMap[endpoint];
     }
 

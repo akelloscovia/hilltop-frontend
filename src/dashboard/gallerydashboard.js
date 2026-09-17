@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./gallerydashboard.css";
-import { apiGet, apiDelete, apiPostForm } from "../utils/apiClient";
+import { apiGet, apiDelete, apiPostForm, apiPut } from "../utils/apiClient";
+import {
+  GALLERY_CATEGORIES,
+  DEFAULT_GALLERY_CATEGORY,
+  groupGalleryByCategory,
+} from "../data/galleryCategories";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "";
 const LOCAL_GALLERY_KEY = "dashboard_gallery_images";
@@ -29,25 +34,29 @@ const normalizeGalleryData = (data) => {
   return rawImages
     .map((img) => {
       if (typeof img === "string") {
-        if (img.startsWith("http")) {
-          return { id: null, url: img };
+        if (img.startsWith("http") || img.startsWith("/images/")) {
+          return { id: null, url: img, category: DEFAULT_GALLERY_CATEGORY };
         }
 
         return {
           id: null,
-          url: API_BASE_URL ? `${API_BASE_URL}/${img}` : img.startsWith("/") ? img : `/${img}`
+          url: API_BASE_URL ? `${API_BASE_URL}/${img}` : img.startsWith("/") ? img : `/${img}`,
+          category: DEFAULT_GALLERY_CATEGORY
         };
       }
 
       const imagePath = img?.image_url || img?.image || img?.url || img?.src;
       if (!imagePath) return null;
 
+      const category = img?.category || DEFAULT_GALLERY_CATEGORY;
+
       if (
         imagePath.startsWith("http") ||
         imagePath.startsWith("data:") ||
-        imagePath.startsWith("blob:")
+        imagePath.startsWith("blob:") ||
+        imagePath.startsWith("/images/")
       ) {
-        return { id: img?.id ?? null, url: imagePath };
+        return { id: img?.id ?? null, url: imagePath, category };
       }
 
       return {
@@ -56,7 +65,8 @@ const normalizeGalleryData = (data) => {
           ? `${API_BASE_URL}/${imagePath}`
           : imagePath.startsWith("/")
           ? imagePath
-          : `/${imagePath}`
+          : `/${imagePath}`,
+        category
       };
     })
     .filter(Boolean);
@@ -66,6 +76,7 @@ export default function GalleryDashboard() {
   const [images, setImages] = useState([]);
   const [message, setMessage] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadCategory, setUploadCategory] = useState(DEFAULT_GALLERY_CATEGORY);
 
   const loadGalleryFromStorage = React.useCallback(() => {
     try {
@@ -126,7 +137,8 @@ export default function GalleryDashboard() {
       (file) =>
         new Promise((resolve, reject) => {
           const reader = new FileReader();
-          reader.onload = () => resolve({ id: null, url: reader.result, title: file.name });
+          reader.onload = () =>
+            resolve({ id: null, url: reader.result, title: file.name, category: uploadCategory });
           reader.onerror = reject;
           reader.readAsDataURL(file);
         })
@@ -147,6 +159,7 @@ export default function GalleryDashboard() {
       formData.append("images[]", file);
       formData.append("file", file);
     });
+    formData.append("category", uploadCategory);
 
     try {
       const response = await apiPostForm("/gallery", formData);
@@ -186,6 +199,20 @@ export default function GalleryDashboard() {
     }
   };
 
+  const handleCategoryChange = async (id, category) => {
+    const previous = images;
+    setImages((prev) => prev.map((img) => (img.id === id ? { ...img, category } : img)));
+
+    try {
+      await apiPut(`/gallery/${id}`, { category });
+      setMessage("✅ Section updated");
+    } catch (err) {
+      console.error(err);
+      setImages(previous);
+      setMessage("❌ Failed to move image to that section");
+    }
+  };
+
   return (
     <div className="gallery-dashboard">
       <h2>Gallery Dashboard</h2>
@@ -202,6 +229,20 @@ export default function GalleryDashboard() {
             className="upload-input"
           />
         </label>
+        <label className="upload-label">
+          Section
+          <select
+            value={uploadCategory}
+            onChange={(e) => setUploadCategory(e.target.value)}
+            className="category-select"
+          >
+            {GALLERY_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </label>
         <button type="submit" disabled={!selectedFiles.length} className="upload-button">
           Upload Images
         </button>
@@ -209,22 +250,46 @@ export default function GalleryDashboard() {
           <p className="file-count">{selectedFiles.length} file(s) selected</p>
         )}
       </form>
-      <div className="gallery-grid">
-        {images.length === 0 ? (
-          <div className="empty-state">No images uploaded yet</div>
-        ) : (
-          images.map((img, index) => (
-            <div key={`${img.id || index}-${img.url}`} className="image-card">
-              <img src={img.url} alt={`gallery-${index}`} />
-              {img.id ? (
-                <button onClick={() => handleDelete(img.id)}>Delete</button>
-              ) : (
-                <span className="meta-note">Saved image</span>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+
+      {images.length === 0 ? (
+        <div className="empty-state">No images uploaded yet</div>
+      ) : (
+        groupGalleryByCategory(images).map(({ category, items }) => (
+          <div key={category} className="gallery-category-section">
+            <h3>{category}</h3>
+
+            {items.length === 0 ? (
+              <p className="meta-note">No images in this section yet</p>
+            ) : (
+              <div className="gallery-grid">
+                {items.map((img, index) => (
+                  <div key={`${img.id || index}-${img.url}`} className="image-card">
+                    <img src={img.url} alt={`${category}-${index}`} />
+                    {img.id ? (
+                      <>
+                        <select
+                          value={category}
+                          onChange={(e) => handleCategoryChange(img.id, e.target.value)}
+                          className="category-select"
+                        >
+                          {GALLERY_CATEGORIES.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                        <button onClick={() => handleDelete(img.id)}>Delete</button>
+                      </>
+                    ) : (
+                      <span className="meta-note">Saved image</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }

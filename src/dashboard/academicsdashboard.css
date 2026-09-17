@@ -40,8 +40,8 @@
   border-radius: 8px;
   border: none;
   outline: none;
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  color: #012034;
 }
 
 /* TEXTAREA */
@@ -55,17 +55,17 @@
   margin-top: 20px;
   width: 100%;
   padding: 12px;
-  background: #00c6ff;
+  background: #0ea5e9;
   border: none;
   border-radius: 8px;
-  color: #000;
-  font-weight: bold;
+  color: #fff;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.15s ease;
 }
 
 .academics-dashboard button:hover {
-  background: #009ac7;
+  background: #087fae;
 }
 
 /* MESSAGE */

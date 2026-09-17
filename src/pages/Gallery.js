@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./gallery.css";
 import { apiGet } from "../utils/apiClient";
+import { groupGalleryByCategory } from "../data/galleryCategories";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "";
 const LOCAL_GALLERY_KEY = "dashboard_gallery_images";
@@ -8,7 +9,11 @@ const LOCAL_GALLERY_KEY = "dashboard_gallery_images";
 const loadGalleryFromStorage = () => {
   try {
     const saved = localStorage.getItem(LOCAL_GALLERY_KEY);
-    return saved ? JSON.parse(saved) : [];
+    const parsed = saved ? JSON.parse(saved) : [];
+    // Support entries cached by an older version of this page (plain src strings)
+    return parsed.map((item) =>
+      typeof item === "string" ? { src: item, category: undefined } : item
+    );
   } catch (err) {
     console.error("Could not read gallery fallback from localStorage", err);
     return [];
@@ -27,23 +32,29 @@ const unwrapPayload = (payload) => {
   return current;
 };
 
-const getImageSource = (img) => {
+const resolveImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  if (
+    imagePath.startsWith("http") ||
+    imagePath.startsWith("data:") ||
+    imagePath.startsWith("blob:") ||
+    imagePath.startsWith("/images/")
+  )
+    return imagePath;
+  if (API_BASE_URL) return `${API_BASE_URL}/${imagePath}`;
+  return imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+};
+
+// Normalizes a raw gallery item (string or object) into { src, category }
+const getImageEntry = (img) => {
   if (typeof img === "string") {
-    if (
-      img.startsWith("http") ||
-      img.startsWith("data:") ||
-      img.startsWith("blob:")
-    )
-      return img;
-    if (API_BASE_URL) return `${API_BASE_URL}/${img}`;
-    return img.startsWith("/") ? img : `/${img}`;
+    const src = resolveImageUrl(img);
+    return src ? { src, category: undefined } : null;
   }
 
   const imagePath = img?.image || img?.image_url || img?.url || img?.src;
-  if (!imagePath) return null;
-  if (imagePath.startsWith("http")) return imagePath;
-  if (API_BASE_URL) return `${API_BASE_URL}/${imagePath}`;
-  return imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+  const src = resolveImageUrl(imagePath);
+  return src ? { src, category: img?.category } : null;
 };
 
 export default function Gallery() {
@@ -66,21 +77,21 @@ export default function Gallery() {
           : [];
 
         const formattedImages = rawImages
-          .map(getImageSource)
+          .map(getImageEntry)
           .filter(Boolean);
 
         if (formattedImages.length > 0) {
           setGalleryImages(formattedImages);
           localStorage.setItem(LOCAL_GALLERY_KEY, JSON.stringify(formattedImages));
           setBgImage(
-            formattedImages[Math.floor(Math.random() * formattedImages.length)]
+            formattedImages[Math.floor(Math.random() * formattedImages.length)].src
           );
         } else {
           const fallback = loadGalleryFromStorage();
           setGalleryImages(fallback);
           setBgImage(
             fallback.length > 0
-              ? fallback[Math.floor(Math.random() * fallback.length)]
+              ? fallback[Math.floor(Math.random() * fallback.length)].src
               : ""
           );
         }
@@ -125,26 +136,36 @@ export default function Gallery() {
             Explore photos of our students, activities, and school events.
           </p>
 
-          <div className="gallery-grid">
-            {galleryImages.length > 0 ? (
-              galleryImages.map((src, index) => (
-                <img
-                  key={`${src}-${index}`}
-                  src={src}
-                  alt={`Gallery ${index + 1}`}
-                  className="gallery-img"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.target.src = "/images/placeholder.jpg";
-                  }}
-                />
-              ))
-            ) : (
-              <p style={{ textAlign: "center" }}>
-                No images uploaded from the dashboard yet.
-              </p>
-            )}
-          </div>
+          {galleryImages.length === 0 ? (
+            <p style={{ textAlign: "center" }}>
+              No images uploaded from the dashboard yet.
+            </p>
+          ) : (
+            groupGalleryByCategory(galleryImages).map(({ category, items }) => (
+              <div key={category} className="gallery-category-section">
+                <h3>{category}</h3>
+
+                {items.length > 0 ? (
+                  <div className="gallery-grid">
+                    {items.map((entry, index) => (
+                      <img
+                        key={`${entry.src}-${index}`}
+                        src={entry.src}
+                        alt={`${category} ${index + 1}`}
+                        className="gallery-img"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src = "/images/placeholder.jpg";
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ textAlign: "center" }}>No photos in this section yet.</p>
+                )}
+              </div>
+            ))
+          )}
         </section>
       </div>
     </div>

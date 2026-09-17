@@ -44,15 +44,15 @@
   padding: 10px;
   border-radius: 8px;
   border: none;
-  background: rgba(255,255,255,0.1);
-  color: #000;
+  background: rgba(255,255,255,0.14);
+  color: #012034;
 }
 
 .home-dashboard .gallery-upload button {
   margin-top: 12px;
   padding: 11px 18px;
-  background: #00c6ff;
-  color: #000;
+  background: #0ea5e9;
+  color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -76,28 +76,44 @@
   margin-top: 5px;
   border-radius: 8px;
   border: none;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  background: rgba(255,255,255,0.12);
+  color: #012034;
 }
 
 .home-dashboard textarea {
   min-height: 100px;
 }
 
+.core-value-section {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 18px;
+  border-radius: 14px;
+  margin-top: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.core-value-section label {
+  margin-top: 12px;
+}
+
+.core-value-section textarea {
+  min-height: 70px;
+}
+
 .home-dashboard button {
   margin-top: 20px;
   width: 100%;
   padding: 12px;
-  background: #00c6ff;
+  background: #0ea5e9;
   border: none;
   border-radius: 8px;
-  color: #000;
-  font-weight: bold;
+  color: #fff;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .home-dashboard button:hover {
-  background: #009ac7;
+  background: #087fae;
 }
 
 .message {

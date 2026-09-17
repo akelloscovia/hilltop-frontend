@@ -10,7 +10,7 @@ const API_URL = "/admissions";
 const API_BASE_URL = process.env.REACT_APP_API_URL || "";
 const getImageUrl = (value) => {
   if (!value) return "";
-  if (value.startsWith("http")) return value;
+  if (value.startsWith("http") || value.startsWith("/images/")) return value;
   if (API_BASE_URL) return `${API_BASE_URL}/${value}`;
   return value.startsWith("/") ? value : `/${value}`;
 };

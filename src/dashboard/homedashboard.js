@@ -15,7 +15,7 @@ const buildImageUrl = (value) => {
   if (typeof value !== "string") return "";
   const cleanValue = value.trim();
   if (!cleanValue) return "";
-  if (cleanValue.startsWith("http") || cleanValue.startsWith("data:") || cleanValue.startsWith("blob:")) return cleanValue;
+  if (cleanValue.startsWith("http") || cleanValue.startsWith("data:") || cleanValue.startsWith("blob:") || cleanValue.startsWith("/images/")) return cleanValue;
   if (cleanValue.startsWith("/api/")) return cleanValue;
   if (API_BASE_URL) return `${API_BASE_URL}/${cleanValue.replace(/^\/+/, "")}`;
   return cleanValue.startsWith("/") ? cleanValue : `/${cleanValue}`;
@@ -32,6 +32,23 @@ const unwrapPayload = (payload) => {
     current = current.data || current.result;
   }
   return current;
+};
+
+const normalizeCoreValueCandidate = (item) => {
+  if (typeof item === "string") {
+    return { title: item.trim(), description: "" };
+  }
+  if (item && typeof item === "object") {
+    const title = item.title || item.name || item.label || item.value || "";
+    const description = item.description || item.text || item.note || "";
+    return { title: title.toString().trim(), description: description.toString().trim() };
+  }
+  return { title: "", description: "" };
+};
+
+const normalizeCoreValues = (values) => {
+  if (!Array.isArray(values)) return [];
+  return values.map(normalizeCoreValueCandidate);
 };
 
 const loadHomeDataFromStorage = () => {
@@ -60,10 +77,26 @@ export default function Home() {
     description:
       "Hilltop Junior School is a warm and vibrant learning community offering Daycare, Kindergarten, and Primary education. We provide a safe, friendly, and inclusive environment where every child thrives.",
     coreValues: [
-      "Integrity",
-      "Excellence",
-      "Innovation",
-      "Community"
+      {
+        title: "Community",
+        description:
+          "We build connections between students, staffs and families for mutual support."
+      },
+      {
+        title: "Respect",
+        description:
+          "We value diversity, kindness and dignity for all."
+      },
+      {
+        title: "Excellence",
+        description:
+          "We strive to high standards in learning and behavior."
+      },
+      {
+        title: "Curiosity",
+        description:
+          "We encourage exploration, creativity and love of learning."
+      }
     ]
   });
   const [loading, setLoading] = useState(true);
@@ -93,9 +126,9 @@ export default function Home() {
           description: data.about_text || fallback?.about_text || content.description,
           coreValues:
             hasCoreValues
-              ? data.core_values.slice(0, 4)
+              ? normalizeCoreValues(data.core_values).slice(0, 4)
               : Array.isArray(fallback?.core_values)
-              ? fallback.core_values.slice(0, 4)
+              ? normalizeCoreValues(fallback.core_values).slice(0, 4)
               : content.coreValues
         });
       } catch (err) {
@@ -129,10 +162,11 @@ export default function Home() {
     setContent((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCoreValueChange = (index, value) => {
+  const handleCoreValueChange = (index, field, value) => {
     setContent((prev) => {
       const coreValues = [...(prev.coreValues || [])];
-      coreValues[index] = value;
+      const existing = normalizeCoreValueCandidate(coreValues[index] || "");
+      coreValues[index] = { ...existing, [field]: value };
       return { ...prev, coreValues };
     });
   };
@@ -222,30 +256,54 @@ export default function Home() {
         <input name="subtitle" value={content.subtitle} onChange={handleChange} />
         <label>Intro / About Text</label>
         <textarea name="description" value={content.description} onChange={handleChange} />
-        <label>Core Value 1</label>
-        <input
-          name="coreValue0"
-          value={content.coreValues[0] || ""}
-          onChange={(e) => handleCoreValueChange(0, e.target.value)}
-        />
-        <label>Core Value 2</label>
-        <input
-          name="coreValue1"
-          value={content.coreValues[1] || ""}
-          onChange={(e) => handleCoreValueChange(1, e.target.value)}
-        />
-        <label>Core Value 3</label>
-        <input
-          name="coreValue2"
-          value={content.coreValues[2] || ""}
-          onChange={(e) => handleCoreValueChange(2, e.target.value)}
-        />
-        <label>Core Value 4</label>
-        <input
-          name="coreValue3"
-          value={content.coreValues[3] || ""}
-          onChange={(e) => handleCoreValueChange(3, e.target.value)}
-        />
+        <div className="core-value-section">
+          <label>Core Value 1 Title</label>
+          <input
+            value={content.coreValues[0]?.title || ""}
+            onChange={(e) => handleCoreValueChange(0, "title", e.target.value)}
+          />
+          <label>Core Value 1 Description</label>
+          <textarea
+            value={content.coreValues[0]?.description || ""}
+            onChange={(e) => handleCoreValueChange(0, "description", e.target.value)}
+          />
+        </div>
+        <div className="core-value-section">
+          <label>Core Value 2 Title</label>
+          <input
+            value={content.coreValues[1]?.title || ""}
+            onChange={(e) => handleCoreValueChange(1, "title", e.target.value)}
+          />
+          <label>Core Value 2 Description</label>
+          <textarea
+            value={content.coreValues[1]?.description || ""}
+            onChange={(e) => handleCoreValueChange(1, "description", e.target.value)}
+          />
+        </div>
+        <div className="core-value-section">
+          <label>Core Value 3 Title</label>
+          <input
+            value={content.coreValues[2]?.title || ""}
+            onChange={(e) => handleCoreValueChange(2, "title", e.target.value)}
+          />
+          <label>Core Value 3 Description</label>
+          <textarea
+            value={content.coreValues[2]?.description || ""}
+            onChange={(e) => handleCoreValueChange(2, "description", e.target.value)}
+          />
+        </div>
+        <div className="core-value-section">
+          <label>Core Value 4 Title</label>
+          <input
+            value={content.coreValues[3]?.title || ""}
+            onChange={(e) => handleCoreValueChange(3, "title", e.target.value)}
+          />
+          <label>Core Value 4 Description</label>
+          <textarea
+            value={content.coreValues[3]?.description || ""}
+            onChange={(e) => handleCoreValueChange(3, "description", e.target.value)}
+          />
+        </div>
         <button type="submit">Save Home Content</button>
       </form>
 
@@ -262,7 +320,10 @@ export default function Home() {
           <strong>Core Values:</strong>
           <ul>
             {content.coreValues?.map((value, idx) => (
-              <li key={idx}>{value}</li>
+              <li key={idx}>
+                <strong>{value.title || value}</strong>
+                {value.description ? ` — ${value.description}` : ""}
+              </li>
             ))}
           </ul>
         </div>

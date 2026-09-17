@@ -43,6 +43,23 @@
   color: #0a2f92;
 }
 
+.gallery-category-section {
+  margin-top: 34px;
+}
+
+.gallery-category-section:first-of-type {
+  margin-top: 10px;
+}
+
+.gallery-category-section h3 {
+  color: #0a2f92;
+  font-size: 1.35rem;
+  text-align: center;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #cee0ff;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(180px, 1fr));

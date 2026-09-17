@@ -88,8 +88,8 @@
   padding: 14px 16px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
-  color: #eef6ff;
+  background: rgba(255, 255, 255, 0.12);
+  color: #012034;
   outline: none;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
@@ -117,17 +117,17 @@
   padding: 16px;
   border-radius: 16px;
   border: none;
-  background: linear-gradient(135deg, #60a5fa 0%, #0ea5e9 100%);
-  color: #07192b;
+  background: linear-gradient(135deg, #0ea5e9 0%, #048bb5 100%);
+  color: #ffffff;
   font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .admissions-form button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.25);
+  box-shadow: 0 12px 24px rgba(4, 139, 181, 0.25);
 }
 
 .message {
